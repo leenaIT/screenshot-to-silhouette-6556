@@ -10,6 +10,7 @@ export type Spatial = "front" | "rear" | "side" | "height" | "coverage" | "envel
 export interface Building { width: number; depth: number; floors: number; floorHeight: number; frontGap: number; sideGap: number; annex?: boolean; tone?: "neutral" | "bad" | "ok" }
 
 export interface EnvelopeProps {
+  parcelPolygon?: [number, number][];
   parcel: { width: number; depth: number };
   setbacks: { front: number; rear: number; side: number };
   maxHeight: number;
@@ -61,7 +62,7 @@ function Box({ w, h, d, pos, color, opacity = 1, edge, highlight }: { w: number;
   );
 }
 
-function Scene({ parcel, setbacks, maxHeight, altHeight, layers = {}, selected, building }: EnvelopeProps) {
+function Scene({ parcel, setbacks, maxHeight, altHeight, layers = {}, selected, building, parcelPolygon }: EnvelopeProps) {
   const L = { envelope: true, restricted: true, unresolved: true, building: true, dims: true, context: true, ...layers };
   const W = parcel.width, D = parcel.depth;
   const bw = W - 2 * setbacks.side, bd = D - setbacks.front - setbacks.rear;
@@ -87,13 +88,16 @@ function Scene({ parcel, setbacks, maxHeight, altHeight, layers = {}, selected, 
       ))}
       {/* parcel */}
       <mesh rotation-x={-Math.PI / 2} position={[0, 0.02, 0]} receiveShadow>
-        <planeGeometry args={[W, D]} />
+        {parcelPolygon ? <shapeGeometry args={[new THREE.Shape(parcelPolygon.map(([x, z]) => new THREE.Vector2(x, -z)))]} /> : <planeGeometry args={[W, D]} />}
         <meshStandardMaterial color={C.parcel} roughness={0.9} />
       </mesh>
-      <lineSegments position={[0, 0.05, 0]}>
+      {parcelPolygon ? <lineLoop position={[0, 0.05, 0]}>
+        <bufferGeometry><bufferAttribute attach="attributes-position" args={[new Float32Array(parcelPolygon.flatMap(([x, z]) => [x, 0, z])), 3]} /></bufferGeometry>
+        <lineBasicMaterial color={C.olive} linewidth={2} />
+      </lineLoop> : <lineSegments position={[0, 0.05, 0]}>
         <edgesGeometry args={[new THREE.BoxGeometry(W, 0.01, D)]} />
         <lineBasicMaterial color={C.line} />
-      </lineSegments>
+      </lineSegments>}
 
       {/* neighbouring context */}
       {L.context && (

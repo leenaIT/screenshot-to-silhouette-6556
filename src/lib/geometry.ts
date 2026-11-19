@@ -3,6 +3,15 @@
 export interface Parcel { width: number; depth: number }
 export interface Setbacks { front: number; rear: number; side: number }
 
+// Local tangent-plane coordinates in metres, preserving the supplied polygon.
+export function projectParcel(coordinates: readonly number[][], center: readonly number[]) {
+  const lat = center[0] ?? 0, lng = center[1] ?? 0;
+  return coordinates.slice(0, -1).map(([longitude = 0, latitude = 0]) => [
+    (longitude - lng) * 111320 * Math.cos(lat * Math.PI / 180),
+    -(latitude - lat) * 111320,
+  ] as [number, number]);
+}
+
 export interface Envelope {
   buildWidth: number;
   buildDepth: number;

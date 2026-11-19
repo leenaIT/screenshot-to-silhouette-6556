@@ -170,3 +170,14 @@
 
 .parcel-tip { background: oklch(0.16 0.01 150 / 80%); color: var(--ivory); border: 1px solid var(--sand); font-family: var(--font-sans); font-weight: 600; }
 .parcel-tip::before { display: none; }
+
+[role="dialog"]:fullscreen {
+  position: fixed;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  max-width: none !important;
+  translate: none !important;
+  transform: none !important;
+  border-radius: 0;
+}

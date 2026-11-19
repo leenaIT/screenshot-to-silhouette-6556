@@ -31,6 +31,9 @@ use the editor.
 
 ## BUNYAN architecture
 - Spatial limits come only from the pure-TS `src/lib/geometry.ts` (tested); AI/mock services supply parameters, never dimensions — keeps geometry deterministic and testable.
-- AI, GIS and plan parsing are simulated behind interfaces in `src/lib/services.ts`; all regulatory data lives in `src/lib/mock-data.ts` and must stay labelled as demo — no fabricated official regulations.
+- Legacy AI, GIS and plan demonstrations use `src/lib/services.ts` and `src/lib/mock-data.ts`; the selected-parcel workspace uses separate configurable JSON datasets, with regulatory values and excerpts reviewed against original PDF pages, so independent legacy scenarios never become real-parcel findings.
 - 3D scenes load via `Scene3D` (ClientOnly + lazy) so three.js never runs during SSR.
 - App pages wrap content in `AppShell` (right-side RTL nav); i18n via `src/lib/i18n.tsx`.
+- The map-first home workspace gates analysis behind parcel and project selection and keeps conversation, map, and source-viewer state in-place to preserve the user journey.
+- PDF documents use immutable asset pointers and local source configuration; React-PDF and its worker load lazily in the browser to avoid SSR evaluation.
+- Project geographic rings through `geometry.ts` to metre coordinates; absent verified spatial parameters, render only the real parcel polygon rather than inferred envelopes.
