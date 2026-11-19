@@ -1,4 +1,5 @@
 # BUNYAN incremental update
+- [x] Replace welcome-page step cards with an interactive explorer and benefit cards with a before/after comparison; verify all states on desktop and phone.
 - [x] Add animated mock location search and previous-project selection without mixing demo parcels with verified findings.
 - [x] Add a logo-only welcome page, villa image, animated steps and benefits; connect the Home icon.
 - [x] Verify search, project selection, navigation, and desktop/mobile layouts.

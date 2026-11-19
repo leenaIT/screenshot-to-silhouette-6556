@@ -47,3 +47,4 @@ use the editor.
 - AI endpoint safety uses server-only database pauses and atomic hashed-visitor rate counters; provider denials require owner recovery rather than reload retries.
 - Map search and previous-project examples share a presentation-only location catalog; only the verified parcel can activate regulatory analysis, preventing mock locations from inheriting real findings.
 - The welcome page is a separate public route; the root remains the map workspace to preserve existing URLs and selection flow.
+- Welcome-page animations are isolated presentation-only explorers; illustrative regulation previews never supply values to parcel analysis.
