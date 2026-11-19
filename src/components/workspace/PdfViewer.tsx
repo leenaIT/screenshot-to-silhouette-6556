@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useRef } from 'react';
+import { lazy, Suspense, useState, useRef, useEffect } from 'react';
 import { ClientOnly } from '@tanstack/react-router';
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, ExternalLink } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -14,6 +14,22 @@ export function PdfViewer({ reference, onClose }: { reference: SourceReference |
 function ViewerContent({ source, reference }: { source: typeof sources[number]; reference: SourceReference }) {
   const [page, setPage] = useState(reference.page), [pages, setPages] = useState(source.pages), [zoom, setZoom] = useState(1);
   const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const sync = () => {
+      if (document.fullscreenElement === element) {
+        element.style.setProperty('translate', 'none', 'important');
+        element.style.setProperty('inset', '0', 'important');
+        element.style.setProperty('height', '100dvh', 'important');
+        element.style.setProperty('max-width', 'none', 'important');
+      } else {
+        for (const property of ['translate', 'inset', 'height', 'max-width']) element.style.removeProperty(property);
+      }
+    };
+    document.addEventListener('fullscreenchange', sync);
+    return () => document.removeEventListener('fullscreenchange', sync);
+  }, []);
   const fullscreen = async () => { if (!ref.current) return; if (document.fullscreenElement) await document.exitFullscreen(); else await ref.current.requestFullscreen(); };
   return <DialogContent ref={ref} dir="rtl" className="glass flex h-[90dvh] max-w-[94vw] flex-col gap-0 overflow-hidden border-ivory/10 bg-forest p-0 text-ivory sm:max-w-[94vw] fullscreen:top-0 fullscreen:left-0 fullscreen:h-dvh fullscreen:max-w-none fullscreen:translate-x-0 fullscreen:translate-y-0 fullscreen:rounded-none">
     <header className="border-b border-ivory/10 p-4 pr-12"><DialogTitle className="text-sm leading-relaxed">{source.title}</DialogTitle><DialogDescription className="text-xs text-ivory/60">{source.authority} · صفحة PDF {page}{reference.clause ? ` · ${reference.clause}` : ''}</DialogDescription></header>
