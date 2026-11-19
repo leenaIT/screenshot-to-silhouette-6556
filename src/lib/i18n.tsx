@@ -20,7 +20,7 @@ const dict = {
 export type Key = keyof typeof dict;
 
 const Ctx = createContext<{ lang: Lang; setLang: (l: Lang) => void; t: (k: Key) => string }>({
-  lang: "ar", setLang: () => {}, t: (k) => dict[k][0],
+  lang: "ar", setLang: () => {}, t: (k) => (dict[k]?.[0] ?? k),
 });
 
 export function LangProvider({ children }: { children: ReactNode }) {
@@ -34,6 +34,6 @@ export function LangProvider({ children }: { children: ReactNode }) {
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
     localStorage.setItem("bunyan-lang", lang);
   }, [lang]);
-  return <Ctx.Provider value={{ lang, setLang, t: (k) => dict[k][lang === "ar" ? 0 : 1] }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ lang, setLang, t: (k) => (dict[k]?.[lang === "ar" ? 0 : 1] ?? k) }}>{children}</Ctx.Provider>;
 }
 export const useI18n = () => useContext(Ctx);
