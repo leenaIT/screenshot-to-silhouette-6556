@@ -1,4 +1,9 @@
 # BUNYAN incremental update
+- [x] Start at neighborhood zoom with hidden parcel, authentic labels, scale, and selection-only focus.
+- [x] Simplify land summary and add one compact review with natural cited answers and expandable chat.
+- [x] Refine complete two-floor villa, automatic annotations, and essential expanded viewing controls.
+- [x] Connect supported demo-plan results to chat; distinguish arbitrary uploads from scripted analysis.
+- [x] Verify full journey, retained state, PDFs, and desktop/mobile layout; commit improvements.
 - [x] Improve flexible panels, compact upload, collapsible 3D, and dark scrollbars.
 - [x] Start scripted review once on confirmation and automatically show requirements/conflicts.
 - [x] Add labeled illustrative villa, coverage comparisons, connected layers, and fitted cameras.

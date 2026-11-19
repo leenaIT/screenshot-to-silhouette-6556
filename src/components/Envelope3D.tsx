@@ -3,7 +3,7 @@ import { OrbitControls, Html, Environment, Lightformer, Edges, ContactShadows } 
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import ParcelIllustration, { type Illustration } from './workspace/ParcelIllustration';
-import { polygonCenter } from '@/lib/geometry';
+import { polygonCenter, parcelFrame } from '@/lib/geometry';
 
 export type View = "perspective" | "top" | "front" | "side";
 export type Layer = "envelope" | "restricted" | "unresolved" | "building" | "dims" | "context";
@@ -12,6 +12,7 @@ export type Spatial = "front" | "rear" | "side" | "height" | "coverage" | "envel
 export interface Building { width: number; depth: number; floors: number; floorHeight: number; frontGap: number; sideGap: number; annex?: boolean; tone?: "neutral" | "bad" | "ok" }
 
 export interface EnvelopeProps {
+  cameraCommand?: { id: number; kind: 'reset' | 'in' | 'out' };
   illustration?: Illustration;
   parcelPolygon?: [number, number][];
   parcel: { width: number; depth: number };
@@ -41,7 +42,7 @@ function Label({ position, children, tone = "line" }: { position: [number, numbe
   );
 }
 
-function CameraRig({ view, size, polygon, illustrative }: { view: View; size: number; polygon?: [number, number][] | undefined; illustrative?: boolean }) {
+function CameraRig({ view, size, polygon, illustrative, command }: { view: View; size: number; polygon?: [number, number][] | undefined; illustrative?: boolean; command?: EnvelopeProps['cameraCommand'] }) {
   const viewport = useThree(state => state.size);
   const { camera, controls } = useThree() as unknown as { camera: THREE.PerspectiveCamera; controls: { target: THREE.Vector3; update: () => void } | null };
   useEffect(() => {
@@ -50,10 +51,30 @@ function CameraRig({ view, size, polygon, illustrative }: { view: View; size: nu
     const pos: Record<View, [number, number, number]> = {
       perspective: [d * 0.85, d * 0.7, d * 0.95], top: [0, d * 1.6, 0.01], front: [0, size * 0.25, d * 1.4], side: [d * 1.4, size * 0.25, 0],
     };
+    if (illustrative && polygon && view === 'perspective') {
+      const angle = -parcelFrame(polygon).angle;
+      const [x, y, z] = pos.perspective;
+      pos.perspective = [x * Math.cos(angle) + z * Math.sin(angle), y, -x * Math.sin(angle) + z * Math.cos(angle)];
+    }
     camera.position.set(pos[view][0] + (center[0] ?? 0), pos[view][1], pos[view][2] + (center[1] ?? 0));
     camera.lookAt(center[0] ?? 0, illustrative ? 1.5 : 4, center[1] ?? 0);
     if (controls) { controls.target.set(center[0] ?? 0, illustrative ? 1.5 : 4, center[1] ?? 0); controls.update(); }
   }, [view, size, camera, controls, viewport.width, viewport.height, polygon, illustrative]);
+  useEffect(() => {
+    if (!command || !controls) return;
+    if (command.kind === 'reset') {
+      const d = size * Math.max(1.15, 1.05 / (viewport.width / viewport.height));
+      const center = polygon ? polygonCenter(polygon) : [0, 0];
+      controls.target.set(center[0] ?? 0, 1.5, center[1] ?? 0);
+      const angle = polygon ? -parcelFrame(polygon).angle : 0;
+      camera.position.set((center[0] ?? 0) + d * (.85 * Math.cos(angle) + .95 * Math.sin(angle)), d * .7, (center[1] ?? 0) + d * (-.85 * Math.sin(angle) + .95 * Math.cos(angle)));
+    } else {
+      const offset = camera.position.clone().sub(controls.target);
+      const next = Math.max(15, Math.min(180, offset.length() * (command.kind === 'in' ? .8 : 1.25)));
+      camera.position.copy(controls.target).add(offset.setLength(next));
+    }
+    controls.update();
+  }, [command, camera, controls, polygon, size, viewport.width, viewport.height]);
   return null;
 }
 
@@ -205,7 +226,7 @@ export default function Envelope3D(props: EnvelopeProps) {
         {props.illustration ? <ParcelIllustration {...props} /> : <Scene {...props} />}
         <ContactShadows position={[0, 0.03, 0]} opacity={0.25} scale={size * 3} blur={2.5} far={20} />
         <OrbitControls makeDefault enabled={props.interactive !== false} autoRotate={!!props.autoRotate} autoRotateSpeed={0.6} maxPolarAngle={Math.PI / 2.05} minDistance={15} maxDistance={180} />
-        <CameraRig view={props.view ?? "perspective"} size={size} polygon={props.parcelPolygon} illustrative={!!props.illustration} />
+        <CameraRig view={props.view ?? "perspective"} size={size} polygon={props.parcelPolygon} illustrative={!!props.illustration} command={props.cameraCommand} />
       </Canvas>
     </div>
   );

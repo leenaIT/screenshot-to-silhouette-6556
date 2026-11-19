@@ -16,7 +16,7 @@ describe('Al Narjis demonstration rules', () => {
   it('uses the exact supplied real parcel and closed longitude-latitude polygon', () => {
     expect(parcel.number).toBe('725'); expect(parcel.area).toBe(200.1);
     expect(parcel.coordinates).toEqual([[46.650856172851952,24.885792555740007],[46.650649143800102,24.885706221141227],[46.650613343001005,24.885777654799242],[46.650820371163626,24.885863989453004],[46.650856172851952,24.885792555740007]]);
-    expect(parcel.center).toEqual([24.88578,46.65073]); expect(parcel.zoom).toBe(19);
+    expect(parcel.center).toEqual([24.88578,46.65073]); expect(parcel.zoom).toBe(16);
   });
   it('requires parcel selection and only accepts a villa project', () => {
     expect(canActivateWorkspace('map', 'فيلا سكنية')).toBe(false);
