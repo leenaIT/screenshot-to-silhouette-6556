@@ -234,3 +234,28 @@
   transform: none !important;
   border-radius: 0;
 }
+
+.location-search { animation-duration: 280ms; }
+.welcome-hero { height: min(740px, calc(100svh - 180px)); min-height: 540px; }
+.welcome-hero-shade { background: linear-gradient(to left, var(--forest) 0%, color-mix(in oklch, var(--forest) 92%, transparent) 27%, color-mix(in oklch, var(--forest) 48%, transparent) 52%, transparent 78%); }
+.welcome-highlight { text-decoration: underline; text-decoration-color: color-mix(in oklch, var(--olive) 65%, transparent); text-decoration-thickness: 6px; text-underline-offset: 8px; }
+.welcome-card { transition: transform 280ms ease, box-shadow 280ms ease, border-color 280ms ease; }
+.welcome-card:hover { transform: translateY(-6px); border-color: var(--primary); box-shadow: var(--shadow-lift), 0 0 0 1px color-mix(in oklch, var(--primary) 15%, transparent); }
+.welcome-icon, .welcome-icon svg, .welcome-number { transition: color 280ms ease, background-color 280ms ease, transform 280ms ease; }
+.welcome-card:hover .welcome-icon { background-color: var(--primary); color: var(--primary-foreground); }
+.welcome-card:hover .welcome-icon svg { transform: scale(1.08) rotate(-5deg); }
+.welcome-card:hover .welcome-number { color: color-mix(in oklch, var(--primary) 40%, transparent); }
+.welcome-connector { position: absolute; top: 48px; inset-inline: 20px; height: 1px; background: var(--olive); transform-origin: right; }
+@media (max-width: 1023px) { .welcome-connector { display: none; } }
+@media (max-width: 699px) {
+  .welcome-hero { min-height: 620px; height: calc(100svh - 150px); max-height: 760px; }
+  .welcome-hero-shade { background: linear-gradient(to top, var(--forest), color-mix(in oklch, var(--forest) 92%, transparent) 42%, color-mix(in oklch, var(--forest) 25%, transparent)); }
+  .welcome-hero > div:last-child { align-items: flex-end; }
+  .welcome-hero img { object-position: 30% center; }
+  .workspace > .glass:first-of-type { gap: 8px; padding-inline: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .welcome-card, .welcome-icon, .welcome-icon svg, .welcome-number { transition: none; }
+  .welcome-card:hover, .welcome-card:hover .welcome-icon svg { transform: none; }
+  .location-search { animation: none; }
+}

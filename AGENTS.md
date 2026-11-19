@@ -45,3 +45,5 @@ use the editor.
 - Interactive parcel details use a pure regulatory-JSON adapter and shared dialog selection state; missing areas and floor ratios stay unavailable rather than becoming invented findings.
 - Claude follow-ups stream through the native Messages gateway in a server-only handler with verified JSON context; the existing scripted initial review remains separate, and session-only chat is not persisted.
 - AI endpoint safety uses server-only database pauses and atomic hashed-visitor rate counters; provider denials require owner recovery rather than reload retries.
+- Map search and previous-project examples share a presentation-only location catalog; only the verified parcel can activate regulatory analysis, preventing mock locations from inheriting real findings.
+- The welcome page is a separate public route; the root remains the map workspace to preserve existing URLs and selection flow.

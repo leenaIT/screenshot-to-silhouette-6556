@@ -26,6 +26,7 @@ import { Route as RegulationsRouteImport } from './routes/regulations'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as ReviewRouteImport } from './routes/review'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as WorkspaceRouteImport } from './routes/workspace'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
@@ -114,6 +115,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WorkspaceRoute = WorkspaceRouteImport.update({
   id: '/workspace',
   path: '/workspace',
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/report': typeof ReportRoute
   '/review': typeof ReviewRoute
   '/settings': typeof SettingsRoute
+  '/welcome': typeof WelcomeRoute
   '/workspace': typeof WorkspaceRoute
   '/api/chat': typeof ApiChatRoute
 }
@@ -164,6 +171,7 @@ export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/review': typeof ReviewRoute
   '/settings': typeof SettingsRoute
+  '/welcome': typeof WelcomeRoute
   '/workspace': typeof WorkspaceRoute
   '/api/chat': typeof ApiChatRoute
 }
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/report': typeof ReportRoute
   '/review': typeof ReviewRoute
   '/settings': typeof SettingsRoute
+  '/welcome': typeof WelcomeRoute
   '/workspace': typeof WorkspaceRoute
   '/api/chat': typeof ApiChatRoute
 }
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/review'
     | '/settings'
+    | '/welcome'
     | '/workspace'
     | '/api/chat'
   fileRoutesByTo: FileRoutesByTo
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/review'
     | '/settings'
+    | '/welcome'
     | '/workspace'
     | '/api/chat'
   id:
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/review'
     | '/settings'
+    | '/welcome'
     | '/workspace'
     | '/api/chat'
   fileRoutesById: FileRoutesById
@@ -273,6 +285,7 @@ export interface RootRouteChildren {
   ReportRoute: typeof ReportRoute
   ReviewRoute: typeof ReviewRoute
   SettingsRoute: typeof SettingsRoute
+  WelcomeRoute: typeof WelcomeRoute
   WorkspaceRoute: typeof WorkspaceRoute
   ApiChatRoute: typeof ApiChatRoute
 }
@@ -398,6 +411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/workspace': {
       id: '/workspace'
       path: '/workspace'
@@ -433,6 +453,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportRoute: ReportRoute,
   ReviewRoute: ReviewRoute,
   SettingsRoute: SettingsRoute,
+  WelcomeRoute: WelcomeRoute,
   WorkspaceRoute: WorkspaceRoute,
   ApiChatRoute: ApiChatRoute,
 }

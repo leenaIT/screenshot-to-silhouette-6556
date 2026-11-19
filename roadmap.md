@@ -1,4 +1,7 @@
 # BUNYAN incremental update
+- [x] Add animated mock location search and previous-project selection without mixing demo parcels with verified findings.
+- [x] Add a logo-only welcome page, villa image, animated steps and benefits; connect the Home icon.
+- [x] Verify search, project selection, navigation, and desktop/mobile layouts.
 - [x] Add Claude-powered source-grounded follow-up answers to the existing session conversation.
 - [x] Verify real Claude streaming, source links, cancellation, safety rules, and tests.
 - [x] Make the expanded scene comparison-only with clickable, cited regulatory detail cards and clearer coverage surfaces.
