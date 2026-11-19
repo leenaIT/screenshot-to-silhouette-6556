@@ -57,9 +57,10 @@ function Workspace() {
   const sourceCaption = comparison === 'first' ? 'نظام القطعة · 70% · PDF 1' : comparison === 'second' ? 'اشتراطات المباني السكنية · 75% · PDF 18' : 'نظام القطعة 70% · PDF 1 ↔ الاشتراطات السكنية 75% · PDF 18';
   return <div dir="rtl" className="workspace relative h-dvh w-full overflow-hidden bg-forest text-ivory">
     <ClientOnly fallback={<div className="blueprint absolute inset-0" />}><Suspense fallback={<div className="blueprint absolute inset-0" />}><ParcelMap onSelect={() => { setNotice(null); setStage(s => s === "map" ? "land" : s); }} onUnsupported={() => setNotice("يدعم العرض التجريبي حاليًا قطعة أرض محددة في حي النرجس.")} /></Suspense></ClientOnly>
-    <div className="glass pointer-events-auto absolute left-1/2 top-4 z-10 flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-4 rounded-full px-5 py-2 text-sm">
+    <div className="glass pointer-events-auto absolute inset-x-4 top-4 z-10 flex items-center gap-4 rounded-full px-5 py-2 text-sm">
       <Logo light /><span className="hidden whitespace-nowrap text-ivory/70 md:inline"><MapPin className="ml-1 inline h-3.5 w-3.5" />الرياض — حي النرجس</span>
       <span className="whitespace-nowrap rounded-full bg-warn/25 px-2 py-0.5 text-[11px] text-warn">عرض تجريبي</span>
+      <span className="flex-1" />
       <Link to="/about" className="hidden text-ivory/70 hover:text-sand sm:inline" title="عن بنيان"><Info className="h-4 w-4" /></Link><Link to="/dashboard" className="text-ivory/70 hover:text-sand" title="لوحة التحكم"><Home className="h-4 w-4" /></Link>
     </div>
     <section className={cn("glass absolute bottom-4 left-4 top-20 z-10 flex w-64 flex-col overflow-hidden rounded-2xl lg:w-80", "max-[699px]:bottom-auto max-[699px]:top-[34%] max-[699px]:max-h-[30%] max-[699px]:w-[calc(100%-2rem)]")}>
