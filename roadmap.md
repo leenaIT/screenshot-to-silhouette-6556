@@ -1,4 +1,6 @@
 # BUNYAN incremental update
+- [x] Refine only the existing villa scene: automatic ground-level coverage comparison, annotations, legend, and fitted camera.
+- [x] Match the PDF viewer to shared translucent glass; verify both viewers and retained controls.
 - [x] Start at neighborhood zoom with hidden parcel, authentic labels, scale, and selection-only focus.
 - [x] Simplify land summary and add one compact review with natural cited answers and expandable chat.
 - [x] Refine complete two-floor villa, automatic annotations, and essential expanded viewing controls.

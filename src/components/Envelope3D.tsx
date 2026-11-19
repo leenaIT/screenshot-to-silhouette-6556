@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import ParcelIllustration, { type Illustration } from './workspace/ParcelIllustration';
 import { polygonCenter, parcelFrame } from '@/lib/geometry';
+import { regulations } from '@/lib/workspace-data';
 
 export type View = "perspective" | "top" | "front" | "side";
 export type Layer = "envelope" | "restricted" | "unresolved" | "building" | "dims" | "context";
@@ -46,10 +47,10 @@ function CameraRig({ view, size, polygon, illustrative, command }: { view: View;
   const viewport = useThree(state => state.size);
   const { camera, controls } = useThree() as unknown as { camera: THREE.PerspectiveCamera; controls: { target: THREE.Vector3; update: () => void } | null };
   useEffect(() => {
-    const d = size * (illustrative ? Math.max(1.15, 1.05 / (viewport.width / viewport.height)) : 1.75);
+    const d = size * (illustrative ? Math.max(1.05, 1 / (viewport.width / viewport.height)) : 1.75);
     const center = polygon ? polygonCenter(polygon) : [0, 0];
     const pos: Record<View, [number, number, number]> = {
-      perspective: [d * 0.85, d * 0.7, d * 0.95], top: [0, d * 1.6, 0.01], front: [0, size * 0.25, d * 1.4], side: [d * 1.4, size * 0.25, 0],
+      perspective: [d * 0.85, d * (illustrative ? .95 : .7), d * 0.95], top: [0, d * 1.6, 0.01], front: [0, size * 0.25, d * 1.4], side: [d * 1.4, size * 0.25, 0],
     };
     if (illustrative && polygon && view === 'perspective') {
       const angle = -parcelFrame(polygon).angle;
@@ -63,11 +64,11 @@ function CameraRig({ view, size, polygon, illustrative, command }: { view: View;
   useEffect(() => {
     if (!command || !controls) return;
     if (command.kind === 'reset') {
-      const d = size * Math.max(1.15, 1.05 / (viewport.width / viewport.height));
+      const d = size * Math.max(1.05, 1 / (viewport.width / viewport.height));
       const center = polygon ? polygonCenter(polygon) : [0, 0];
       controls.target.set(center[0] ?? 0, 1.5, center[1] ?? 0);
       const angle = polygon ? -parcelFrame(polygon).angle : 0;
-      camera.position.set((center[0] ?? 0) + d * (.85 * Math.cos(angle) + .95 * Math.sin(angle)), d * .7, (center[1] ?? 0) + d * (-.85 * Math.sin(angle) + .95 * Math.cos(angle)));
+      camera.position.set((center[0] ?? 0) + d * (.85 * Math.cos(angle) + .95 * Math.sin(angle)), d * .95, (center[1] ?? 0) + d * (-.85 * Math.sin(angle) + .95 * Math.cos(angle)));
     } else {
       const offset = camera.position.clone().sub(controls.target);
       const next = Math.max(15, Math.min(180, offset.length() * (command.kind === 'in' ? .8 : 1.25)));
@@ -213,7 +214,7 @@ export default function Envelope3D(props: EnvelopeProps) {
   const ref = useRef<HTMLDivElement>(null);
   const size = Math.max(props.parcel.width, props.parcel.depth);
   return (
-    <div ref={ref} className="h-full w-full" data-scene-ready={ready ? "" : undefined}>
+    <div ref={ref} className={`relative h-full w-full ${props.illustration ? 'parcel-scene' : ''}`} data-scene-ready={ready ? "" : undefined}>
       <Canvas shadows dpr={[1, 2]} camera={{ fov: 38, near: 0.5, far: 800, position: [40, 35, 45] }} onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; requestAnimationFrame(() => setReady(true)); }}>
         <color attach="background" args={["#efeae0"]} />
         <fog attach="fog" args={["#efeae0", size * 3, size * 7]} />
@@ -228,6 +229,11 @@ export default function Envelope3D(props: EnvelopeProps) {
         <OrbitControls makeDefault enabled={props.interactive !== false} autoRotate={!!props.autoRotate} autoRotateSpeed={0.6} maxPolarAngle={Math.PI / 2.05} minDistance={15} maxDistance={180} />
         <CameraRig view={props.view ?? "perspective"} size={size} polygon={props.parcelPolygon} illustrative={!!props.illustration} command={props.cameraCommand} />
       </Canvas>
+      {props.illustration && <aside dir="rtl" className="parcel-scene-summary" aria-label="دليل ألوان التصور التنظيمي">
+        <ul><li><span className="scene-swatch scene-swatch-common" />نطاق مشترك بين المصدرين</li><li><span className="scene-swatch scene-swatch-discrepancy" />اختلاف غير محسوم — ليس مخالفة</li><li><span className="scene-swatch scene-swatch-review" />يتطلب مراجعة مختص</li></ul>
+        <p>{regulations.requirements.find(r => r.id === 'floors')?.value} · مسطحات توضيحية وليست حدود بناء معتمدة</p>
+        <p className="scene-review-note">الارتفاع بالمتر: غير متاح · {regulations.requirements.find(r => r.id === 'setbacks')?.value}</p>
+      </aside>}
     </div>
   );
 }

@@ -38,6 +38,7 @@ use the editor.
 - PDF documents use immutable asset pointers and local source configuration; React-PDF and its worker load lazily in the browser to avoid SSR evaluation.
 - Project geographic rings through `geometry.ts` to metre coordinates; absent verified spatial parameters, use a separately labeled illustrative villa and centroid-scaled coverage comparisons, never inferred legal envelopes.
 - The selected-parcel scene uses a dedicated browser-only illustration branch; coverage ratios and floor count come from verified JSON, while model heights/materials remain explicitly illustrative to isolate legacy scenarios.
+- Compare coverage automatically on ground-level illustrative polygons, with source-area arithmetic in geometry.ts; missing height/setback limits remain text-only so no fabricated spatial envelope is drawn.
 - Automatic review is keyed to a confirmed selection and guarded by a ref; callbacks never retrigger it, preserving follow-up conversations during layout changes.
 - Keep parcel geometry invisible until selection; focus the Leaflet map only on explicit selection, never on panel resize, so document and chat interactions retain geographic navigation.
 - Scripted answers use numbered document/page citations and a single workflow status; assistant expansion keeps its mounted state, and arbitrary plan uploads are preview-only rather than assigned demo findings.

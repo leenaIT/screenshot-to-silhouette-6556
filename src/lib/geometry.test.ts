@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { computeEnvelope, checkProposal, illustrativeCoveragePolygon } from "./geometry";
+import { computeEnvelope, checkProposal, illustrativeCoveragePolygon, coverageAreas } from "./geometry";
 
 describe('illustrative coverage comparisons', () => {
+  it('shows the documented 200.1 m² parcel coverage comparison without rounding intermediate values', () => {
+    const result = coverageAreas(200.1, .7, .75);
+    expect(result.common).toBeCloseTo(140.07, 8);
+    expect(result.larger).toBeCloseTo(150.075, 8);
+    expect(result.difference).toBeCloseTo(10.005, 8);
+  });
   const polygon: [number, number][] = [[0, 0], [20, 0], [20, 10], [0, 10]];
   const area = (points: [number, number][]) => Math.abs(points.reduce((sum, [x, z], i) => { const next = points[(i + 1) % points.length]; return sum + (next ? x * next[1] - next[0] * z : 0); }, 0)) / 2;
   it('scales first-source illustrative area to 70%, not an exact legal shape', () => {

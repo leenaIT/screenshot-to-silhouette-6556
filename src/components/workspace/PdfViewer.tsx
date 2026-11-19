@@ -31,7 +31,7 @@ function ViewerContent({ source, reference }: { source: typeof sources[number]; 
     return () => document.removeEventListener('fullscreenchange', sync);
   }, []);
   const fullscreen = async () => { if (!ref.current) return; if (document.fullscreenElement) await document.exitFullscreen(); else await ref.current.requestFullscreen(); };
-  return <DialogContent ref={ref} dir="rtl" className="glass flex h-[90dvh] max-w-[94vw] flex-col gap-0 overflow-hidden border-ivory/10 bg-forest p-0 text-ivory sm:max-w-[94vw] fullscreen:top-0 fullscreen:left-0 fullscreen:h-dvh fullscreen:max-w-none fullscreen:translate-x-0 fullscreen:translate-y-0 fullscreen:rounded-none">
+  return <DialogContent ref={ref} dir="rtl" className="glass pdf-viewer flex h-[90dvh] max-w-[94vw] flex-col gap-0 overflow-hidden border-ivory/10 p-0 text-ivory sm:max-w-[94vw] fullscreen:top-0 fullscreen:left-0 fullscreen:h-dvh fullscreen:max-w-none fullscreen:translate-x-0 fullscreen:translate-y-0 fullscreen:rounded-none">
     <header className="border-b border-ivory/10 p-4 pr-12"><DialogTitle className="text-sm leading-relaxed">{source.title}</DialogTitle><DialogDescription className="text-xs text-ivory/60">{source.authority} · صفحة PDF {page}{reference.clause ? ` · ${reference.clause}` : ''}</DialogDescription></header>
     <div className="flex flex-wrap items-center justify-center gap-2 border-b border-ivory/10 p-2">
       <Button variant="ghost" size="icon" title="الصفحة السابقة" aria-label="الصفحة السابقة" disabled={page <= 1} onClick={() => setPage(p => p - 1)}><ChevronRight /></Button>

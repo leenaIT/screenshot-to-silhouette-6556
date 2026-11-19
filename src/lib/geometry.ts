@@ -3,6 +3,11 @@
 export interface Parcel { width: number; depth: number }
 export interface Setbacks { front: number; rear: number; side: number }
 
+// Source-area arithmetic only; illustrative polygons never establish a legal footprint.
+export function coverageAreas(area: number, first: number, second: number) {
+  return { common: area * Math.min(first, second), larger: area * Math.max(first, second), difference: area * Math.abs(second - first) };
+}
+
 // Local tangent-plane coordinates in metres, preserving the supplied polygon.
 export function projectParcel(coordinates: readonly number[][], center: readonly number[]) {
   const lat = center[0] ?? 0, lng = center[1] ?? 0;
