@@ -3,15 +3,16 @@ import { cn } from "@/lib/utils";
 import { DEMO_NOTICE } from "@/lib/mock-data";
 import { FlaskConical } from "lucide-react";
 import type { ReactNode } from "react";
-import logoAsset from "@/assets/bunyan-logo.svg.asset.json";
+import logoLightAsset from "@/assets/bunyan-logo-light.svg.asset.json";
+import logoDarkAsset from "@/assets/bunyan-logo-dark.svg.asset.json";
 
 export function Logo({ light }: { light?: boolean }) {
   return (
     <Link to="/" className="flex items-center gap-2.5" aria-label="بنيان — BUNYAN">
       <img
-        src={logoAsset.url}
+        src={light ? logoLightAsset.url : logoDarkAsset.url}
         alt="بنيان — BUNYAN"
-        className={cn("h-9 w-auto", !light && "logo-on-light")}
+        className="h-9 w-auto"
       />
     </Link>
   );
