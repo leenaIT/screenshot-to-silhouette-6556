@@ -36,4 +36,6 @@ use the editor.
 - App pages wrap content in `AppShell` (right-side RTL nav); i18n via `src/lib/i18n.tsx`.
 - The map-first home workspace gates analysis behind parcel and project selection and keeps conversation, map, and source-viewer state in-place to preserve the user journey.
 - PDF documents use immutable asset pointers and local source configuration; React-PDF and its worker load lazily in the browser to avoid SSR evaluation.
-- Project geographic rings through `geometry.ts` to metre coordinates; absent verified spatial parameters, render only the real parcel polygon rather than inferred envelopes.
+- Project geographic rings through `geometry.ts` to metre coordinates; absent verified spatial parameters, use a separately labeled illustrative villa and centroid-scaled coverage comparisons, never inferred legal envelopes.
+- The selected-parcel scene uses a dedicated browser-only illustration branch; coverage ratios and floor count come from verified JSON, while model heights/materials remain explicitly illustrative to isolate legacy scenarios.
+- Automatic review is keyed to a confirmed selection and guarded by a ref; callbacks never retrigger it, preserving follow-up conversations during layout changes.

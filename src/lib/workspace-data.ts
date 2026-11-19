@@ -13,3 +13,7 @@ export function matchScenario(text: string) {
 export function canActivateWorkspace(stage: string, projectType: string) {
   return stage === 'project' && parcel.projectTypes.includes(projectType);
 }
+
+export function shouldStartReview(selectionId: string | null, previousSelectionId: string | null) {
+  return selectionId !== null && selectionId !== previousSelectionId;
+}

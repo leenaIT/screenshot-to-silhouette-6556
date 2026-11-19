@@ -1,7 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { parcel, regulations, sources, matchScenario, canActivateWorkspace } from './workspace-data';
+import { parcel, regulations, sources, matchScenario, canActivateWorkspace, shouldStartReview } from './workspace-data';
 import { projectParcel } from './geometry';
 describe('Al Narjis demonstration rules', () => {
+  it('starts once per confirmed land/project selection, never on ordinary re-renders', () => {
+    expect(shouldStartReview(null, null)).toBe(false);
+    expect(shouldStartReview('725:villa', null)).toBe(true);
+    expect(shouldStartReview('725:villa', '725:villa')).toBe(false);
+    expect(shouldStartReview('726:villa', '725:villa')).toBe(true);
+  });
+  it('uses only the verified two-floor villa and both unresolved coverage ratios', () => {
+    expect(regulations.verifiedDisplayParameters.floors.count).toBe(2);
+    expect(regulations.verifiedDisplayParameters.coverageScenarios.map(s => s.ratio)).toEqual([.7, .75]);
+    expect(regulations.geometryParameters).toBeNull();
+  });
   it('uses the exact supplied real parcel and closed longitude-latitude polygon', () => {
     expect(parcel.number).toBe('725'); expect(parcel.area).toBe(200.1);
     expect(parcel.coordinates).toEqual([[46.650856172851952,24.885792555740007],[46.650649143800102,24.885706221141227],[46.650613343001005,24.885777654799242],[46.650820371163626,24.885863989453004],[46.650856172851952,24.885792555740007]]);

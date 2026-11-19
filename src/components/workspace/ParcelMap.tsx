@@ -3,7 +3,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { parcel } from '@/lib/workspace-data';
 
-// Demo parcel near Al-Malqa, Riyadh. 20 m x 30 m = 600 m².
+// Exact supplied Al Narjis parcel; the selection is a scripted demonstration.
 const PARCEL_CENTER: [number, number] = [parcel.center[0] ?? 0, parcel.center[1] ?? 0];
 const polygon: [number, number][] = parcel.coordinates.map(([lng = 0, lat = 0]) => [lat, lng]);
 
@@ -19,11 +19,14 @@ export default function ParcelMap({ onSelect }: { onSelect: () => void }) {
     L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 20, maxNativeZoom: 19, attribution: "Esri" }).addTo(m);
     L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}", { maxZoom: 20, maxNativeZoom: 19, opacity: 0.7 }).addTo(m);
     L.control.zoom({ position: "bottomleft" }).addTo(m);
-    const olive = getComputedStyle(document.documentElement).getPropertyValue('--olive').trim();
-    const shape = L.polygon(polygon, { color: olive, weight: 3, fillColor: olive, fillOpacity: 0.28 }).addTo(m)
+    const styles = getComputedStyle(document.documentElement);
+    const red = styles.getPropertyValue('--parcel-highlight').trim();
+    L.polygon(polygon, { color: styles.getPropertyValue('--ivory').trim(), weight: 7, fill: false, interactive: false }).addTo(m);
+    const shape = L.polygon(polygon, { color: red, weight: 4, opacity: 1, fillColor: red, fillOpacity: 0.20 }).addTo(m)
       .bindTooltip('قطعة رقم 725 — 200.1 م²', { permanent: true, direction: 'center', className: 'parcel-tip', interactive: true });
     shape.on('click', () => select.current());
     shape.getTooltip()?.on('click', () => select.current());
+    polygon.slice(0, -1).forEach(point => L.circleMarker(point, { radius: 3, color: styles.getPropertyValue('--ivory').trim(), weight: 1, fillColor: red, fillOpacity: 1, interactive: false }).addTo(m));
     const focus = () => {
       m.invalidateSize();
       const width = m.getSize().x, height = m.getSize().y;

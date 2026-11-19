@@ -2,6 +2,8 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, Html, Environment, Lightformer, Edges, ContactShadows } from "@react-three/drei";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import ParcelIllustration, { type Illustration } from './workspace/ParcelIllustration';
+import { polygonCenter } from '@/lib/geometry';
 
 export type View = "perspective" | "top" | "front" | "side";
 export type Layer = "envelope" | "restricted" | "unresolved" | "building" | "dims" | "context";
@@ -10,6 +12,7 @@ export type Spatial = "front" | "rear" | "side" | "height" | "coverage" | "envel
 export interface Building { width: number; depth: number; floors: number; floorHeight: number; frontGap: number; sideGap: number; annex?: boolean; tone?: "neutral" | "bad" | "ok" }
 
 export interface EnvelopeProps {
+  illustration?: Illustration;
   parcelPolygon?: [number, number][];
   parcel: { width: number; depth: number };
   setbacks: { front: number; rear: number; side: number };
@@ -38,17 +41,19 @@ function Label({ position, children, tone = "line" }: { position: [number, numbe
   );
 }
 
-function CameraRig({ view, size }: { view: View; size: number }) {
+function CameraRig({ view, size, polygon, illustrative }: { view: View; size: number; polygon?: [number, number][] | undefined; illustrative?: boolean }) {
+  const viewport = useThree(state => state.size);
   const { camera, controls } = useThree() as unknown as { camera: THREE.PerspectiveCamera; controls: { target: THREE.Vector3; update: () => void } | null };
   useEffect(() => {
-    const d = size * 1.75;
+    const d = size * (illustrative ? Math.max(1.15, 1.05 / (viewport.width / viewport.height)) : 1.75);
+    const center = polygon ? polygonCenter(polygon) : [0, 0];
     const pos: Record<View, [number, number, number]> = {
       perspective: [d * 0.85, d * 0.7, d * 0.95], top: [0, d * 1.6, 0.01], front: [0, size * 0.25, d * 1.4], side: [d * 1.4, size * 0.25, 0],
     };
-    camera.position.set(...pos[view]);
-    camera.lookAt(0, 4, 0);
-    if (controls) { controls.target.set(0, 4, 0); controls.update(); }
-  }, [view, size, camera, controls]);
+    camera.position.set(pos[view][0] + (center[0] ?? 0), pos[view][1], pos[view][2] + (center[1] ?? 0));
+    camera.lookAt(center[0] ?? 0, illustrative ? 1.5 : 4, center[1] ?? 0);
+    if (controls) { controls.target.set(center[0] ?? 0, illustrative ? 1.5 : 4, center[1] ?? 0); controls.update(); }
+  }, [view, size, camera, controls, viewport.width, viewport.height, polygon, illustrative]);
   return null;
 }
 
@@ -197,10 +202,10 @@ export default function Envelope3D(props: EnvelopeProps) {
           <Lightformer intensity={1.6} position={[0, 6, 0]} scale={[12, 12, 1]} rotation-x={Math.PI / 2} />
           <Lightformer intensity={0.8} color="#e9dcc2" position={[-6, 2, 2]} rotation-y={Math.PI / 2} scale={[20, 2, 1]} />
         </Environment>
-        <Scene {...props} />
+        {props.illustration ? <ParcelIllustration {...props} /> : <Scene {...props} />}
         <ContactShadows position={[0, 0.03, 0]} opacity={0.25} scale={size * 3} blur={2.5} far={20} />
         <OrbitControls makeDefault enabled={props.interactive !== false} autoRotate={!!props.autoRotate} autoRotateSpeed={0.6} maxPolarAngle={Math.PI / 2.05} minDistance={15} maxDistance={180} />
-        <CameraRig view={props.view ?? "perspective"} size={size} />
+        <CameraRig view={props.view ?? "perspective"} size={size} polygon={props.parcelPolygon} illustrative={!!props.illustration} />
       </Canvas>
     </div>
   );

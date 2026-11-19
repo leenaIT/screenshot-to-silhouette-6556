@@ -81,6 +81,13 @@
     }
   ],
   "geometryParameters": null,
+  "verifiedDisplayParameters": {
+    "floors": { "count": 2, "source": { "documentId": "parcel", "page": 1 } },
+    "coverageScenarios": [
+      { "ratio": 0.7, "source": { "documentId": "parcel", "page": 1 } },
+      { "ratio": 0.75, "source": { "documentId": "residential", "page": 18 } }
+    ]
+  },
   "conflicts": [
     {
       "id": "ground-coverage",

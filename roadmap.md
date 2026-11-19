@@ -1,4 +1,8 @@
 # BUNYAN incremental update
+- [x] Improve flexible panels, compact upload, collapsible 3D, and dark scrollbars.
+- [x] Start scripted review once on confirmation and automatically show requirements/conflicts.
+- [x] Add labeled illustrative villa, coverage comparisons, connected layers, and fitted cameras.
+- [x] Highlight the unchanged parcel in red and verify desktop/mobile interactions.
 - [x] Replace workspace parcel and add land → villa selection.
 - [x] Implement JSON-driven simulated conversation and verified regulations/conflicts.
 - [x] Serve both original PDFs and add page-aware PDF viewer.
