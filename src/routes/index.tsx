@@ -12,7 +12,8 @@ import { PdfViewer } from "@/components/workspace/PdfViewer";
 import { parcel, regulations, canActivateWorkspace, type SourceReference } from "@/lib/workspace-data";
 import { projectParcel } from "@/lib/geometry";
 import { cn } from "@/lib/utils";
-import type { Comparison } from '@/components/workspace/ParcelIllustration';
+import { COMPARISON_MODE, elementDetail, type ParcelElement } from '@/lib/illustration-details';
+import { sources } from '@/lib/workspace-data';
 const ParcelMap = lazy(() => import("@/components/workspace/ParcelMap"));
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,23 +39,23 @@ const land: [string, string][] = [
   ["نظام البناء", parcel.buildingSystem], ["حالة القطعة", parcel.status],
 ];
 const views: [View, string][] = [["perspective", "منظور ثلاثي الأبعاد"], ["top", "عرض علوي"]];
-const comparisons: [Comparison, string][] = [['first', 'المصدر الأول'], ['second', 'المصدر الثاني'], ['both', 'مقارنة المصدرين']];
 function Workspace() {
   const [stage, setStage] = useState<"map" | "land" | "project" | "active">("map");
   const [retrieved, setRetrieved] = useState(false), [open, setOpen] = useState(false), [view, setView] = useState<View>("perspective");
   const [source, setSource] = useState<SourceReference | null>(null);
-  const [collapsed, setCollapsed] = useState(false), [comparison, setComparison] = useState<Comparison>('first');
+  const [collapsed, setCollapsed] = useState(false);
+  const [selectedElement, setSelectedElement] = useState<ParcelElement | null>(null);
+  const detail = selectedElement ? elementDetail(selectedElement) : null;
   const [planEvent, setPlanEvent] = useState<{ id: number; supported: boolean } | null>(null);
   const [cameraCommand, setCameraCommand] = useState<{ id: number; kind: 'reset' | 'in' | 'out' }>({ id: 0, kind: 'reset' });
   const [notice, setNotice] = useState<string | null>(null);
   const active = stage === "active";
   const [firstCoverage, secondCoverage] = regulations.verifiedDisplayParameters.coverageScenarios;
-  const props = { parcel: bounds, parcelPolygon: polygon, setbacks: { front: 0, rear: 0, side: 0 }, maxHeight: 0, layers: { envelope: false, restricted: false, unresolved: retrieved && comparison === 'both', building: retrieved, context: false, dims: false }, view, building: null,
-    illustration: { coverage: [firstCoverage?.ratio ?? 0, secondCoverage?.ratio ?? 0] as [number, number], floors: regulations.verifiedDisplayParameters.floors.count, comparison, footprint: retrieved, floorsVisible: retrieved, references: false } };
+  const props = { parcel: bounds, parcelPolygon: polygon, setbacks: { front: 0, rear: 0, side: 0 }, maxHeight: 0, layers: { envelope: false, restricted: false, unresolved: retrieved, building: retrieved, context: false, dims: false }, view, building: null,
+    illustration: { coverage: [firstCoverage?.ratio ?? 0, secondCoverage?.ratio ?? 0] as [number, number], floors: regulations.verifiedDisplayParameters.floors.count, comparison: COMPARISON_MODE, footprint: retrieved, floorsVisible: retrieved, references: false } };
   const completeReview = () => setRetrieved(true);
   const command = (kind: 'reset' | 'in' | 'out') => setCameraCommand(c => ({ id: c.id + 1, kind }));
-  const comparisonControls = <div className="flex flex-wrap gap-1">{comparisons.map(([key, label]) => <Button key={key} variant="ghost" size="sm" disabled={!retrieved} onClick={() => setComparison(key)} className={cn('h-auto px-2 py-1 text-[11px]', comparison === key ? 'bg-olive text-ivory' : 'bg-ivory/10')}>{label}</Button>)}</div>;
-  const sourceCaption = comparison === 'first' ? 'نظام القطعة · 70% · PDF 1' : comparison === 'second' ? 'اشتراطات المباني السكنية · 75% · PDF 18' : 'نظام القطعة 70% · PDF 1 ↔ الاشتراطات السكنية 75% · PDF 18';
+  const sourceCaption = regulations.verifiedDisplayParameters.coverageScenarios.map(scenario => `${sources.find(s => s.id === scenario.source.documentId)?.title} ${scenario.ratio * 100}% · صفحة ${scenario.source.page}`).join(' ↔ ');
   return <div dir="rtl" className="workspace relative h-dvh w-full overflow-hidden bg-forest text-ivory">
     <ClientOnly fallback={<div className="blueprint absolute inset-0" />}><Suspense fallback={<div className="blueprint absolute inset-0" />}><ParcelMap onSelect={() => { setNotice(null); setStage(s => s === "map" ? "land" : s); }} onUnsupported={() => setNotice("يدعم العرض التجريبي حاليًا قطعة أرض محددة في حي النرجس.")} /></Suspense></ClientOnly>
     <div className="glass pointer-events-auto absolute inset-x-4 top-4 z-10 flex items-center gap-4 rounded-full px-5 py-2 text-sm">
@@ -88,10 +89,17 @@ function Workspace() {
       <Assistant planEvent={planEvent} active={active} selectionId={active ? `${parcel.number}:فيلا سكنية` : null} onOpen3D={() => setOpen(true)} onRetrieve={completeReview} onSource={setSource} />
       <UploadPanel active={active && retrieved} onAnalysis={supported => setPlanEvent(e => ({ id: (e?.id ?? 0) + 1, supported }))} />
     </div>
-    <Dialog open={open} onOpenChange={setOpen}><DialogContent className="glass flex h-[88dvh] max-w-[94vw] flex-col gap-0 overflow-hidden border-ivory/10 bg-transparent p-0 text-ivory sm:max-w-[94vw]">
+    <Dialog open={open} onOpenChange={value => { setOpen(value); if (!value) setSelectedElement(null); }}><DialogContent dir="rtl" className="glass flex h-[88dvh] max-w-[94vw] flex-col gap-0 overflow-hidden border-ivory/10 bg-transparent p-0 text-ivory sm:max-w-[94vw]">
       <DialogTitle className="sr-only">النموذج ثلاثي الأبعاد للقطعة 725</DialogTitle><DialogDescription className="sr-only">تصور معماري توضيحي — غير معتمد هندسيًا</DialogDescription>
-      <div className="flex flex-wrap items-center gap-2 border-b border-ivory/10 p-3 pr-12">{views.map(([key, label]) => <Button variant="ghost" size="sm" key={key} onClick={() => setView(key)} className={cn("text-xs", view === key ? "bg-olive text-ivory" : "bg-ivory/10")}>{label}</Button>)}<Button variant="ghost" size="icon" aria-label="إعادة ضبط العرض" title="إعادة ضبط العرض" onClick={() => { setView('perspective'); command('reset'); }}><RotateCcw /></Button><Button variant="ghost" size="icon" aria-label="تكبير" title="تكبير" onClick={() => command('in')}><Plus /></Button><Button variant="ghost" size="icon" aria-label="تصغير" title="تصغير" onClick={() => command('out')}><Minus /></Button>{retrieved && comparisonControls}</div>
-      <div className="relative min-h-0 w-full flex-1"><Scene3D {...props} layers={{ ...props.layers, dims: true }} cameraCommand={cameraCommand} /></div>
+      <div className="flex flex-wrap items-center gap-2 border-b border-ivory/10 p-3 pr-12">{views.map(([key, label]) => <Button variant="ghost" size="sm" key={key} onClick={() => setView(key)} className={cn("text-xs", view === key ? "bg-olive text-ivory" : "bg-ivory/10")}>{label}</Button>)}<Button variant="ghost" size="icon" aria-label="إعادة ضبط العرض" title="إعادة ضبط العرض" onClick={() => { setView('perspective'); command('reset'); }}><RotateCcw /></Button><Button variant="ghost" size="icon" aria-label="تكبير" title="تكبير" onClick={() => command('in')}><Plus /></Button><Button variant="ghost" size="icon" aria-label="تصغير" title="تصغير" onClick={() => command('out')}><Minus /></Button></div>
+      <div className="flex min-h-0 w-full flex-1 flex-col md:flex-row">
+        {detail && <aside aria-label="تفاصيل الجزء المحدد" className="glass z-10 max-h-[34%] shrink-0 overflow-y-auto border-b border-ivory/10 p-4 md:max-h-none md:w-64 md:border-b-0 md:border-l">
+          <h3 className="text-sm font-semibold">{detail.name}</h3>
+          <dl className="mt-3 space-y-3 text-xs leading-relaxed"><div><dt className="text-ivory/60">القيمة الموثقة</dt><dd>{detail.value}</dd></div><div><dt className="text-ivory/60">المساحة بالمتر المربع</dt><dd>غير متاحة في ملف الاشتراطات</dd></div><div><dt className="text-ivory/60">الحالة</dt><dd className={detail.unresolved ? 'text-warn' : 'text-olive'}>{detail.status}</dd></div></dl>
+          <div className="mt-4 space-y-2"><p className="text-xs text-ivory/60">المصدر</p>{detail.sources.length ? detail.sources.map(ref => <Button key={`${ref.documentId}:${ref.page}`} variant="link" className="h-auto w-full justify-start whitespace-normal p-0 text-right text-xs leading-relaxed text-sand" onClick={() => setSource(ref)}>{sources.find(s => s.id === ref.documentId)?.title} · صفحة {ref.page}</Button>) : <p className="text-xs text-ivory/60">مرجع الحدود غير متاح في ملف الاشتراطات</p>}</div>
+        </aside>}
+        <div className="relative min-h-0 min-w-0 flex-1"><p className="glass pointer-events-none absolute inset-x-3 top-3 z-10 rounded-md px-3 py-2 text-center text-xs">اضغط على أي جزء لعرض تفاصيله</p><Scene3D {...props} selectedElement={selectedElement} onElementSelect={setSelectedElement} layers={{ ...props.layers, dims: true }} cameraCommand={cameraCommand} /></div>
+      </div>
       <div className="shrink-0 border-t border-ivory/10 p-2 text-center text-xs text-warn">تصور معماري توضيحي — غير معتمد هندسيًا · أرضي + أول{retrieved && <p className="text-sand">{sourceCaption}</p>}</div>
     </DialogContent></Dialog>
     <PdfViewer reference={source} onClose={() => setSource(null)} />

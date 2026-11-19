@@ -1,4 +1,6 @@
 # BUNYAN incremental update
+- [x] Make the expanded scene comparison-only with clickable, cited regulatory detail cards and clearer coverage surfaces.
+- [x] Verify scene selection, PDF links, clearing, and desktop/mobile layout.
 - [x] Refine only the existing villa scene: automatic ground-level coverage comparison, annotations, legend, and fitted camera.
 - [x] Match the PDF viewer to shared translucent glass; verify both viewers and retained controls.
 - [x] Start at neighborhood zoom with hidden parcel, authentic labels, scale, and selection-only focus.

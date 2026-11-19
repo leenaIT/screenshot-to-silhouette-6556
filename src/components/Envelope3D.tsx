@@ -5,6 +5,7 @@ import * as THREE from "three";
 import ParcelIllustration, { type Illustration } from './workspace/ParcelIllustration';
 import { polygonCenter, parcelFrame } from '@/lib/geometry';
 import { regulations } from '@/lib/workspace-data';
+import type { ParcelElement } from '@/lib/illustration-details';
 
 export type View = "perspective" | "top" | "front" | "side";
 export type Layer = "envelope" | "restricted" | "unresolved" | "building" | "dims" | "context";
@@ -15,6 +16,8 @@ export interface Building { width: number; depth: number; floors: number; floorH
 export interface EnvelopeProps {
   cameraCommand?: { id: number; kind: 'reset' | 'in' | 'out' };
   illustration?: Illustration;
+  selectedElement?: ParcelElement | null;
+  onElementSelect?: (element: ParcelElement | null) => void;
   parcelPolygon?: [number, number][];
   parcel: { width: number; depth: number };
   setbacks: { front: number; rear: number; side: number };
@@ -215,7 +218,7 @@ export default function Envelope3D(props: EnvelopeProps) {
   const size = Math.max(props.parcel.width, props.parcel.depth);
   return (
     <div ref={ref} className={`relative h-full w-full ${props.illustration ? 'parcel-scene' : ''}`} data-scene-ready={ready ? "" : undefined}>
-      <Canvas shadows dpr={[1, 2]} camera={{ fov: 38, near: 0.5, far: 800, position: [40, 35, 45] }} onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; requestAnimationFrame(() => setReady(true)); }}>
+      <Canvas onPointerMissed={() => props.onElementSelect?.(null)} shadows dpr={[1, 2]} camera={{ fov: 38, near: 0.5, far: 800, position: [40, 35, 45] }} onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; requestAnimationFrame(() => setReady(true)); }}>
         <color attach="background" args={["#efeae0"]} />
         <fog attach="fog" args={["#efeae0", size * 3, size * 7]} />
         <ambientLight intensity={0.55} />
@@ -226,10 +229,10 @@ export default function Envelope3D(props: EnvelopeProps) {
         </Environment>
         {props.illustration ? <ParcelIllustration {...props} /> : <Scene {...props} />}
         <ContactShadows position={[0, 0.03, 0]} opacity={0.25} scale={size * 3} blur={2.5} far={20} />
-        <OrbitControls makeDefault enabled={props.interactive !== false} autoRotate={!!props.autoRotate} autoRotateSpeed={0.6} maxPolarAngle={Math.PI / 2.05} minDistance={15} maxDistance={180} />
+        <OrbitControls makeDefault enableDamping={!props.illustration} enabled={props.interactive !== false} autoRotate={!!props.autoRotate} autoRotateSpeed={0.6} maxPolarAngle={Math.PI / 2.05} minDistance={15} maxDistance={180} />
         <CameraRig view={props.view ?? "perspective"} size={size} polygon={props.parcelPolygon} illustrative={!!props.illustration} command={props.cameraCommand} />
       </Canvas>
-      {props.illustration && <aside dir="rtl" className="parcel-scene-summary" aria-label="دليل ألوان التصور التنظيمي">
+      {props.illustration && !props.onElementSelect && <aside dir="rtl" className="parcel-scene-summary" aria-label="دليل ألوان التصور التنظيمي">
         <ul><li><span className="scene-swatch scene-swatch-common" />نطاق مشترك بين المصدرين</li><li><span className="scene-swatch scene-swatch-discrepancy" />اختلاف غير محسوم — ليس مخالفة</li><li><span className="scene-swatch scene-swatch-review" />يتطلب مراجعة مختص</li></ul>
         <p>{regulations.requirements.find(r => r.id === 'floors')?.value} · مسطحات توضيحية وليست حدود بناء معتمدة</p>
         <p className="scene-review-note">الارتفاع بالمتر: غير متاح · {regulations.requirements.find(r => r.id === 'setbacks')?.value}</p>

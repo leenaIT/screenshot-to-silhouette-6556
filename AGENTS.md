@@ -42,3 +42,4 @@ use the editor.
 - Automatic review is keyed to a confirmed selection and guarded by a ref; callbacks never retrigger it, preserving follow-up conversations during layout changes.
 - Keep parcel geometry invisible until selection; focus the Leaflet map only on explicit selection, never on panel resize, so document and chat interactions retain geographic navigation.
 - Scripted answers use numbered document/page citations and a single workflow status; assistant expansion keeps its mounted state, and arbitrary plan uploads are preview-only rather than assigned demo findings.
+- Interactive parcel details use a pure regulatory-JSON adapter and shared dialog selection state; missing areas and floor ratios stay unavailable rather than becoming invented findings.
