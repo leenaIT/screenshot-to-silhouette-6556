@@ -14,13 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ai_request_windows: {
+        Row: {
+          requests: number
+          started_at: string
+          visitor_hash: string
+        }
+        Insert: {
+          requests?: number
+          started_at?: string
+          visitor_hash: string
+        }
+        Update: {
+          requests?: number
+          started_at?: string
+          visitor_hash?: string
+        }
+        Relationships: []
+      }
+      ai_service_state: {
+        Row: {
+          reason: string
+          service: string
+          status: number
+          updated_at: string
+        }
+        Insert: {
+          reason: string
+          service: string
+          status: number
+          updated_at?: string
+        }
+        Update: {
+          reason?: string
+          service?: string
+          status?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      claim_ai_request: { Args: { visitor: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

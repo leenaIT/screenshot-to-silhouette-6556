@@ -1,4 +1,6 @@
 # BUNYAN incremental update
+- [x] Add Claude-powered source-grounded follow-up answers to the existing session conversation.
+- [x] Verify real Claude streaming, source links, cancellation, safety rules, and tests.
 - [x] Make the expanded scene comparison-only with clickable, cited regulatory detail cards and clearer coverage surfaces.
 - [x] Verify scene selection, PDF links, clearing, and desktop/mobile layout.
 - [x] Refine only the existing villa scene: automatic ground-level coverage comparison, annotations, legend, and fitted camera.

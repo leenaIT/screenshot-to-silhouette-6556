@@ -1,5 +1,13 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1795128106749,
+      "tag": "0000_bunyan_ai_safety",
+      "breakpoints": true
+    }
+  ]
 }
