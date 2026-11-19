@@ -1,128 +1,215 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Scale, GitCompareArrows, Box, ScanLine, Wand2, PencilRuler, ArrowLeft, Languages, ShieldCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Logo, Pill } from "@/components/brand";
+import { createFileRoute, Link, ClientOnly } from "@tanstack/react-router";
+import { lazy, Suspense, useRef, useState } from "react";
+import { Maximize2, Send, Upload, FileText, Loader2, CheckCircle2, AlertTriangle, Eye, Sparkles, ArrowLeft, Layers, MapPin, Home, Info } from "lucide-react";
 import { Scene3D } from "@/components/Scene3D";
-import { Compare } from "@/components/Compare";
-import { FloorPlan } from "@/components/FloorPlan";
-import { useI18n } from "@/lib/i18n";
-import { demoProject as P } from "@/lib/mock-data";
+import type { View, Layer } from "@/components/Envelope3D";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { Logo } from "@/components/brand";
+import { cn } from "@/lib/utils";
+
+const ParcelMap = lazy(() => import("@/components/workspace/ParcelMap"));
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "بنيان | من أرضك إلى مشروع متوافق مع الاشتراطات العمرانية" },
-      { name: "description", content: "بنيان منصة ذكية لفهم الاشتراطات العمرانية في السعودية، وكشف التعارضات، وتحليل المخططات، وتصور الغلاف البنائي ثلاثي الأبعاد." },
-      { property: "og:title", content: "بنيان | BUNYAN — الامتثال العمراني الذكي" },
-      { property: "og:description", content: "من أرضك إلى مشروع متوافق مع الاشتراطات العمرانية." },
+      { title: "بنيان | مساحة العمل الخرائطية — اشتراطات أرضك في خريطة ونموذج ثلاثي الأبعاد" },
+      { name: "description", content: "خريطة تفاعلية للقطعة مع الارتدادات وغلاف البناء والمساعد الذكي وتحليل المخطط الهندسي — بنيان، منصة الامتثال العمراني الذكي في السعودية." },
+      { property: "og:title", content: "بنيان | BUNYAN — مساحة العمل الخرائطية" },
+      { property: "og:description", content: "اشتراطات أرضك ومخالفات مخططك وغلاف بنائك ثلاثي الأبعاد، في شاشة واحدة." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Landing,
+  component: Workspace,
 });
 
-const caps = [
-  { icon: Scale, t: "تحديد الاشتراطات العمرانية", d: "استرجاع البنود المطبقة على أرضك مع مصدرها ورقم المادة والصفحة." },
-  { icon: GitCompareArrows, t: "كشف التعارضات التنظيمية", d: "عرض المصادر المتعارضة جنباً إلى جنب دون حسمها آلياً." },
-  { icon: Box, t: "التصور العمراني ثلاثي الأبعاد", d: "تحويل الارتدادات والارتفاعات إلى غلاف بنائي تفاعلي." },
-  { icon: ScanLine, t: "تحليل المخططات الهندسية", d: "مقارنة مخططك بالاشتراطات وتحديد موضع كل مخالفة." },
-  { icon: Wand2, t: "اقتراح التعديلات", d: "حلول تصحيحية مبررة نظامياً مع توضيح المفاضلات." },
-  { icon: PencilRuler, t: "إنشاء المخططات المبدئية", d: "مفاهيم تصميمية أولية داخل الغلاف المسموح لمراجعة المختص." },
+const land: [string, string][] = [
+  ["رقم القطعة", "2451-RA"], ["الأبعاد", "20 × 30 م"], ["المساحة", "600 م²"], ["الاستخدام", "سكني"],
+  ["عرض الشارع", "20 م"], ["الشوارع المحيطة", "1"], ["الارتداد الأمامي", "4 م"], ["الارتداد الخلفي", "2 م"],
+  ["الارتداد الجانبي", "2 م"], ["أقصى ارتفاع", "12 م"], ["الأدوار المسموحة", "3"], ["نسبة البناء", "60%"],
+  ["معامل البناء (FAR)", "1.8"], ["المواقف", "2 موقف / وحدة"],
 ];
+type LayerKey = "setbacks" | "height" | "envelope" | "restricted" | "conflicts" | "sources";
+const layerLabels: [LayerKey, string][] = [
+  ["setbacks", "إظهار الارتدادات"], ["height", "إظهار حدود الارتفاع"], ["envelope", "إظهار غلاف البناء"],
+  ["restricted", "إظهار المناطق المقيدة"], ["conflicts", "إظهار التعارضات"], ["sources", "إظهار المراجع"],
+];
+type Mode = "perspective" | "top" | "side" | "envelope" | "building" | "overlay";
+const modes: [Mode, string][] = [["perspective", "منظور"], ["top", "علوي"], ["side", "جانبي"], ["envelope", "الغلاف فقط"], ["building", "غلاف + مبنى"], ["overlay", "طبقة الاشتراطات"]];
 
-function Landing() {
-  const { t, lang, setLang } = useI18n();
+const BUILDING = { width: 15, depth: 20, floors: 3, floorHeight: 3.6, frontGap: 5, sideGap: 2.5, tone: "neutral" as const };
+
+function Glass({ className, children }: { className?: string; children: React.ReactNode }) {
+  return <section className={cn("glass rounded-2xl", className)}>{children}</section>;
+}
+
+function Workspace() {
+  const [lay, setLay] = useState<Record<LayerKey, boolean>>({ setbacks: true, height: true, envelope: true, restricted: true, conflicts: true, sources: true });
+  const [mode, setMode] = useState<Mode>("perspective");
+  const [open, setOpen] = useState(false);
+
+  const view: View = mode === "top" ? "top" : mode === "side" ? "side" : "perspective";
+  const layers: Partial<Record<Layer, boolean>> = {
+    envelope: lay.envelope, restricted: lay.setbacks || mode === "overlay", unresolved: lay.conflicts && lay.height,
+    dims: lay.sources || mode === "overlay", building: mode !== "envelope", context: mode !== "envelope",
+  };
+  const props = { parcel: { width: 20, depth: 30 }, setbacks: { front: 4, rear: 2, side: 2 }, maxHeight: 12, altHeight: lay.conflicts ? 15 : undefined, layers, view, building: mode === "envelope" ? null : BUILDING };
+
   return (
-    <div className="min-h-screen">
-      <header className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
-        <Logo />
-        <nav className="hidden items-center gap-7 text-sm md:flex">
-          <a href="#caps" className="hover:text-primary">القدرات</a>
-          <Link to="/how-it-works" className="hover:text-primary">{t("how")}</Link>
-          <Link to="/library" className="hover:text-primary">{t("library")}</Link>
-          <Link to="/dashboard" className="hover:text-primary">{t("dashboard")}</Link>
-        </nav>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setLang(lang === "ar" ? "en" : "ar")} className="flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm"><Languages className="h-4 w-4" />{lang === "ar" ? "EN" : "ع"}</button>
-          <Button asChild><Link to="/new-project">{t("start")}</Link></Button>
-        </div>
-      </header>
+    <div className="relative h-screen w-full overflow-hidden bg-forest text-ivory">
+      <ClientOnly fallback={<div className="blueprint absolute inset-0" />}>
+        <Suspense fallback={<div className="blueprint absolute inset-0" />}>
+          <ParcelMap showSetbacks={lay.setbacks} showRestricted={lay.restricted} showEnvelope={lay.envelope} />
+        </Suspense>
+      </ClientOnly>
 
-      <section className="mx-auto grid max-w-7xl items-center gap-10 px-6 pb-16 pt-6 lg:grid-cols-[1fr_1.15fr]">
-        <div className="rise">
-          <Pill tone="ai" className="mb-6">منصة امتثال عمراني مدعومة بالذكاء الاصطناعي · المملكة العربية السعودية</Pill>
-          <h1 className="text-4xl font-bold leading-[1.25] text-primary md:text-5xl lg:text-[3.4rem]">{t("heroTitle")}</h1>
-          <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">{t("heroSub")}</p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button size="lg" asChild><Link to="/new-project">{t("start")} <ArrowLeft className="h-4 w-4" /></Link></Button>
-            <Button size="lg" variant="outline" asChild><Link to="/how-it-works">{t("explore")}</Link></Button>
-          </div>
-          <div className="mt-10 grid max-w-md grid-cols-3 gap-6 border-t pt-6 text-sm">
-            <div><div className="text-2xl font-bold text-primary">11</div><div className="text-muted-foreground">متطلباً مستخرجاً</div></div>
-            <div><div className="text-2xl font-bold text-warn">2</div><div className="text-muted-foreground">تعارضات مكتشفة</div></div>
-            <div><div className="text-2xl font-bold text-primary">480 م²</div><div className="text-muted-foreground">مساحة تغطية مسموحة</div></div>
-          </div>
-        </div>
-        <div className="panel relative h-[460px] overflow-hidden lg:h-[560px]">
-          <Scene3D parcel={P.parcel} setbacks={P.setbacks} maxHeight={P.heightB} altHeight={P.heightA}
-            building={{ width: 19, depth: 20, floors: 2, floorHeight: 3.5, frontGap: 7, sideGap: 3, annex: true }} autoRotate />
-          <div className="pointer-events-none absolute bottom-4 right-4 left-4 flex flex-wrap gap-2 text-xs">
-            <Pill tone="ok">الغلاف المسموح</Pill><Pill tone="bad">مناطق الارتداد</Pill><Pill tone="warn">قيد غير محسوم 12–15 م</Pill><Pill>النموذج المقترح</Pill>
-          </div>
-          <div className="pointer-events-none absolute top-4 right-4 rounded-lg bg-card/90 px-3 py-2 text-xs shadow-sm">
-            <div className="font-semibold">فيلا سكنية — حي الملقا، الرياض</div><div className="text-muted-foreground">قطعة 25 × 32 م · 800 م² · تجريبي</div>
-          </div>
-        </div>
-      </section>
+      {/* top bar */}
+      <div className="glass pointer-events-auto absolute left-1/2 top-4 z-10 flex -translate-x-1/2 items-center gap-4 rounded-full px-5 py-2 text-sm">
+        <Logo light />
+        <span className="hidden text-ivory/70 md:inline"><MapPin className="ml-1 inline h-3.5 w-3.5" />الرياض · حي الملقا</span>
+        <span className="rounded-full bg-warn/25 px-2 py-0.5 text-[11px] text-warn">بيانات تجريبية</span>
+        <Link to="/about" className="hidden text-ivory/70 hover:text-sand sm:inline" title="عن بنيان"><Info className="h-4 w-4" /></Link>
+        <Link to="/dashboard" className="text-ivory/70 hover:text-sand" title="لوحة التحكم"><Home className="h-4 w-4" /></Link>
+      </div>
 
-      <section id="caps" className="border-y bg-card/60 py-20">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="eyebrow mb-2">القدرات</div>
-          <h2 className="mb-10 text-3xl font-bold text-primary">ست قدرات في رحلة واحدة متصلة</h2>
-          <div className="grid gap-px overflow-hidden rounded-xl border bg-border md:grid-cols-3">
-            {caps.map((c, i) => (
-              <div key={c.t} className="group bg-card p-7 transition-colors hover:bg-ivory">
-                <div className="mb-5 flex items-center justify-between">
-                  <c.icon className="h-6 w-6 text-olive transition-transform group-hover:-translate-y-0.5" />
-                  <span className="font-mono text-xs text-muted-foreground">0{i + 1}</span>
-                </div>
-                <h3 className="mb-2 text-lg font-semibold">{c.t}</h3>
-                <p className="text-sm leading-6 text-muted-foreground">{c.d}</p>
-              </div>
+      {/* LEFT panel: land + layers */}
+      <Glass className="absolute bottom-4 left-4 top-20 z-10 hidden w-80 flex-col overflow-hidden lg:flex">
+        <div className="border-b border-ivory/10 p-4">
+          <div className="text-[11px] tracking-wide text-olive">بيانات الأرض</div>
+          <h2 className="text-lg font-semibold">فيلا سكنية — 2451-RA</h2>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4">
+          <dl className="grid grid-cols-2 gap-2">
+            {land.map(([k, v]) => (
+              <div key={k} className="rounded-lg bg-ivory/5 px-3 py-2"><dt className="text-[11px] text-ivory/55">{k}</dt><dd className="text-sm font-semibold">{v}</dd></div>
+            ))}
+          </dl>
+          <div className="mt-5 mb-2 flex items-center gap-2 text-[11px] tracking-wide text-olive"><Layers className="h-3.5 w-3.5" />الطبقات</div>
+          <div className="space-y-2">
+            {layerLabels.map(([k, l]) => (
+              <label key={k} className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-1.5 text-sm hover:bg-ivory/5">
+                {l}<Switch className="data-[state=checked]:bg-olive data-[state=unchecked]:bg-ivory/20" checked={lay[k]} onCheckedChange={(c) => setLay((s) => ({ ...s, [k]: c }))} />
+              </label>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 lg:grid-cols-2">
-        <div>
-          <div className="eyebrow mb-2">قبل وبعد</div>
-          <h2 className="text-3xl font-bold text-primary">من مخطط مخالف إلى مقترح متوافق</h2>
-          <p className="mt-4 leading-8 text-muted-foreground">اسحب المؤشر لترى كيف يعيد بنيان ترتيب كتلة المجلس خلف خط الارتداد الأمامي، ويزيل الملحق الذي يرفع نسبة التغطية فوق 60%.</p>
-          <ul className="mt-6 space-y-3 text-sm">
-            <li className="flex gap-2"><span className="mt-1.5 h-2 w-2 rounded-full bg-bad" />الارتداد الأمامي الحالي 4.8 م مقابل 6 م مطلوبة</li>
-            <li className="flex gap-2"><span className="mt-1.5 h-2 w-2 rounded-full bg-ok" />المقترح: إزاحة المجلس 1.4 م للداخل</li>
-            <li className="flex gap-2"><span className="mt-1.5 h-2 w-2 rounded-full bg-warn" />مقترحات أولية تتطلب مراجعة مهندس مرخص</li>
-          </ul>
-          <Button variant="outline" className="mt-8" asChild><Link to="/corrections">استكشف مساحة التعديلات</Link></Button>
-        </div>
-        <Compare before={<div className="bg-card p-6"><FloorPlan variant="original" highlight="front" /></div>} after={<div className="bg-card p-6"><FloorPlan variant="corrected" /></div>} labels={["المخطط الأصلي", "المقترح المعدل"]} />
-      </section>
-
-      <section className="bg-primary py-16 text-primary-foreground">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-6 px-6">
-          <div className="flex items-start gap-4">
-            <ShieldCheck className="mt-1 h-7 w-7 text-sand" />
-            <div>
-              <h3 className="text-xl font-semibold">شفافية قبل كل شيء</h3>
-              <p className="mt-1 max-w-2xl text-sm opacity-80">بنيان أداة مساعدة لا تصدر رخص بناء رسمية. كل نتيجة مرتبطة بمصدرها، وكل تعارض يُحال لمختص، وكل مقترح يُوسم بأنه أولي.</p>
-            </div>
+          <div className="mt-5 rounded-xl border border-ivory/10 p-3 text-sm">
+            <div className="mb-2 text-[11px] text-olive">ملخص النتيجة</div>
+            {[["حالة التوافق", "متوافق مبدئيًا", "text-ok"], ["الاشتراطات المطبقة", "11", ""], ["التعارضات", "1", "text-warn"], ["مراجعة المختص", "بانتظار الإحالة", "text-sand"]].map(([k, v, c]) => (
+              <div key={k} className="flex justify-between py-1"><span className="text-ivory/60">{k}</span><span className={cn("font-semibold", c)}>{v}</span></div>
+            ))}
+            {lay.conflicts && (
+              <Link to="/conflicts" className="mt-2 block rounded-lg bg-warn/15 p-2 text-xs text-warn hover:bg-warn/25">
+                <AlertTriangle className="ml-1 inline h-3.5 w-3.5" />مصدر 1: 15 م مقابل مصدر 2: 12 م — يتطلب مراجعة مختص
+              </Link>
+            )}
           </div>
-          <Button size="lg" variant="secondary" asChild><Link to="/dashboard">جرّب المشروع التجريبي</Link></Button>
         </div>
-      </section>
-      <footer className="mx-auto flex max-w-7xl justify-between px-6 py-8 text-xs text-muted-foreground"><span>© 2026 بنيان — نموذج أولي</span><span>جميع البيانات المعروضة تجريبية</span></footer>
+      </Glass>
+
+      {/* RIGHT column */}
+      <div className="absolute bottom-4 right-4 top-20 z-10 flex w-[min(380px,calc(100%-2rem))] flex-col gap-3">
+        <Glass className="relative h-56 shrink-0 overflow-hidden">
+          <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between p-3">
+            <span className="rounded-full bg-forest/70 px-2.5 py-1 text-xs font-semibold">المعاينة ثلاثية الأبعاد</span>
+            <button onClick={() => setOpen(true)} aria-label="تكبير النموذج" className="rounded-lg bg-forest/70 p-1.5 hover:bg-olive"><Maximize2 className="h-4 w-4" /></button>
+          </div>
+          <Scene3D {...props} layers={{ ...layers, dims: false }} autoRotate interactive={false} />
+        </Glass>
+        <Assistant onOpen3D={() => setOpen(true)} />
+        <UploadPanel />
+      </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="glass flex h-[88vh] max-w-[94vw] flex-col gap-0 overflow-hidden border-ivory/10 bg-transparent p-0 text-ivory sm:max-w-[94vw]">
+          <DialogTitle className="sr-only">النموذج ثلاثي الأبعاد</DialogTitle>
+          <div className="flex flex-wrap gap-2 border-b border-ivory/10 p-3 pr-12">
+            {modes.map(([m, l]) => (
+              <button key={m} onClick={() => setMode(m)} className={cn("rounded-full px-3 py-1 text-xs transition-colors", mode === m ? "bg-olive text-ivory" : "bg-ivory/10 hover:bg-ivory/20")}>{l}</button>
+            ))}
+            <span className="ms-auto self-center text-[11px] text-ivory/50">اسحب للتدوير · مرّر للتكبير · زر يمين للتحريك</span>
+          </div>
+          <Scene3D {...props} className="min-h-0 w-full flex-1" />
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+type Msg = { from: "user" | "ai"; text: string };
+const answers: Record<string, string> = {
+  "ما الارتدادات المطلوبة؟": "الارتداد الأمامي 4 م، الخلفي 2 م، والجانبي 2 م من كل جهة (المصدر: دليل اشتراطات البناء — بيانات تجريبية).",
+  "اعرض التعارضات": "تعارض واحد: مصدر 1 يسمح بارتفاع 15 م، ومصدر 2 يحدده بـ 12 م. لا يُحسم آليًا — يتطلب مراجعة مختص.",
+  "حلل المخطط": "ارفع المخطط من اللوحة أدناه، وسأطابقه مع الاشتراطات وأعرض المخالفات.",
+};
+function Assistant({ onOpen3D }: { onOpen3D: () => void }) {
+  const [msgs, setMsgs] = useState<Msg[]>([
+    { from: "user", text: "اعرض لي الاشتراطات العمرانية المطبقة على هذه الأرض، ووضح إن كان هناك تعارض بينها." },
+    { from: "ai", text: "يُطبَّق 11 اشتراطًا: ارتدادات 4/2/2 م، ارتفاع أقصى 12 م (3 أدوار)، نسبة بناء 60%، ومواقف 2 لكل وحدة.\nرصدت تعارضًا واحدًا في الارتفاع (15 م مقابل 12 م) ويُحال لمختص.\nالمراجع: دليل البناء م.12 ص.34 · لائحة الحي م.7 (تجريبي)." },
+  ]);
+  const [q, setQ] = useState("");
+  const send = (text: string) => {
+    if (!text.trim()) return;
+    if (text === "افتح نموذج 3D") onOpen3D();
+    setMsgs((m) => [...m, { from: "user", text }, { from: "ai", text: text === "افتح نموذج 3D" ? "فتحت النموذج ثلاثي الأبعاد بالحجم الكامل." : answers[text] ?? "هذه استجابة تجريبية؛ سيتم ربط المساعد بنموذج ذكاء اصطناعي ومصادر رسمية لاحقًا." }]);
+    setQ("");
+  };
+  return (
+    <Glass className="flex min-h-0 flex-1 flex-col">
+      <div className="flex items-center gap-2 border-b border-ivory/10 px-4 py-2.5 text-sm font-semibold"><Sparkles className="h-4 w-4 text-sand" />المساعد الذكي</div>
+      <div className="flex flex-1 flex-col justify-end space-y-2 overflow-y-auto p-3 text-[13px] leading-relaxed">
+        {msgs.map((m, i) => (
+          <div key={i} className={cn("max-w-[90%] whitespace-pre-line rounded-xl px-3 py-2", m.from === "user" ? "ms-auto bg-olive/35" : "bg-ivory/8 border border-ivory/10")}>{m.text}</div>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-1.5 px-3 pb-2">
+        {["ما الارتدادات المطلوبة؟", "اعرض التعارضات", "افتح نموذج 3D", "حلل المخطط"].map((c) => (
+          <button key={c} onClick={() => send(c)} className="rounded-full border border-ivory/15 px-2.5 py-0.5 text-[11px] hover:border-sand hover:text-sand">{c}</button>
+        ))}
+      </div>
+      <form onSubmit={(e) => { e.preventDefault(); send(q); }} className="flex gap-2 border-t border-ivory/10 p-2">
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="اسأل عن الاشتراطات…" className="flex-1 rounded-lg bg-ivory/10 px-3 py-1.5 text-sm placeholder:text-ivory/40 focus:outline-none focus:ring-1 focus:ring-olive" />
+        <button className="rounded-lg bg-olive px-3 hover:bg-olive/80" aria-label="إرسال"><Send className="h-4 w-4" /></button>
+      </form>
+    </Glass>
+  );
+}
+
+function UploadPanel() {
+  const [file, setFile] = useState<string | null>(null);
+  const [state, setState] = useState<"idle" | "busy" | "done">("idle");
+  const input = useRef<HTMLInputElement>(null);
+  const start = (name: string) => { setFile(name); setState("busy"); setTimeout(() => setState("done"), 2200); };
+  return (
+    <Glass className="shrink-0 p-3">
+      <div className="mb-2 flex items-center justify-between text-sm font-semibold"><span>تحليل المخطط الهندسي</span><span className="text-[10px] font-normal text-ivory/50">PDF · PNG · JPG · DWG (قريبًا)</span></div>
+      <input ref={input} type="file" accept=".pdf,.png,.jpg,.jpeg,.dwg" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) start(f.name); }} />
+      {state === "idle" && (
+        <div onClick={() => input.current?.click()} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) start(f.name); }}
+          className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-ivory/25 p-3 text-xs text-ivory/70 hover:border-sand">
+          <Upload className="h-5 w-5 text-sand" /><div className="flex-1">اسحب الملف هنا أو اضغط للرفع</div>
+          <button type="button" onClick={(e) => { e.stopPropagation(); start("مخطط-تجريبي-فيلا.pdf"); }} className="rounded-md bg-ivory/10 px-2 py-1 hover:bg-ivory/20">مخطط تجريبي</button>
+        </div>
+      )}
+      {state !== "idle" && (
+        <div className="space-y-2 text-xs">
+          <div className="flex items-center gap-2 rounded-lg bg-ivory/5 p-2"><FileText className="h-4 w-4 text-sand" /><span className="flex-1 truncate">{file}</span>
+            <button onClick={() => setState("idle")} className="text-ivory/50 hover:text-ivory">تغيير</button></div>
+          {state === "busy" ? (
+            <div className="flex items-center gap-2 text-sand"><Loader2 className="h-4 w-4 animate-spin" />جاري تحليل المخطط…</div>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="rounded-lg bg-bad/20 p-1.5"><div className="text-base font-bold text-bad">2</div>مخالفات</div>
+                <div className="rounded-lg bg-ok/20 p-1.5"><div className="text-base font-bold text-ok">8</div><CheckCircle2 className="inline h-3 w-3" /> متوافق</div>
+                <div className="rounded-lg bg-warn/20 p-1.5"><div className="text-base font-bold text-warn">1</div><Eye className="inline h-3 w-3" /> مراجعة</div>
+              </div>
+              <div className="text-ivory/60">تجاوز الارتداد الأمامي · ارتفاع مقترح أعلى من المسموح</div>
+              <Link to="/plan-analysis" className="flex items-center justify-center gap-1 rounded-lg bg-olive py-1.5 font-semibold hover:bg-olive/80">عرض تفاصيل التحليل <ArrowLeft className="h-3.5 w-3.5" /></Link>
+            </>
+          )}
+        </div>
+      )}
+    </Glass>
   );
 }

@@ -16,6 +16,7 @@ const dict = {
     "BUNYAN is your intelligent platform to understand urban regulations, detect conflicts, analyze architectural plans and visualize your project before construction.",
   ],
   demo: ["بيانات تجريبية", "Demo data"], dashboard: ["لوحة التحكم", "Dashboard"],
+  about: ["عن بنيان", "About BUNYAN"],
 } as const;
 export type Key = keyof typeof dict;
 
