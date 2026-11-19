@@ -28,3 +28,9 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## BUNYAN architecture
+- Spatial limits come only from the pure-TS `src/lib/geometry.ts` (tested); AI/mock services supply parameters, never dimensions — keeps geometry deterministic and testable.
+- AI, GIS and plan parsing are simulated behind interfaces in `src/lib/services.ts`; all regulatory data lives in `src/lib/mock-data.ts` and must stay labelled as demo — no fabricated official regulations.
+- 3D scenes load via `Scene3D` (ClientOnly + lazy) so three.js never runs during SSR.
+- App pages wrap content in `AppShell` (right-side RTL nav); i18n via `src/lib/i18n.tsx`.

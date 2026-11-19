@@ -10,33 +10,232 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ConflictsRouteImport } from './routes/conflicts'
+import { Route as CorrectionsRouteImport } from './routes/corrections'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DesignGeneratorRouteImport } from './routes/design-generator'
+import { Route as EnvelopeRouteImport } from './routes/envelope'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as LibraryRouteImport } from './routes/library'
+import { Route as NewProjectRouteImport } from './routes/new-project'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as PlanAnalysisRouteImport } from './routes/plan-analysis'
+import { Route as ProjectsRouteImport } from './routes/projects'
+import { Route as RegulationsRouteImport } from './routes/regulations'
+import { Route as ReportRouteImport } from './routes/report'
+import { Route as ReviewRouteImport } from './routes/review'
+import { Route as SettingsRouteImport } from './routes/settings'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConflictsRoute = ConflictsRouteImport.update({
+  id: '/conflicts',
+  path: '/conflicts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CorrectionsRoute = CorrectionsRouteImport.update({
+  id: '/corrections',
+  path: '/corrections',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DesignGeneratorRoute = DesignGeneratorRouteImport.update({
+  id: '/design-generator',
+  path: '/design-generator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnvelopeRoute = EnvelopeRouteImport.update({
+  id: '/envelope',
+  path: '/envelope',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewProjectRoute = NewProjectRouteImport.update({
+  id: '/new-project',
+  path: '/new-project',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanAnalysisRoute = PlanAnalysisRouteImport.update({
+  id: '/plan-analysis',
+  path: '/plan-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegulationsRoute = RegulationsRouteImport.update({
+  id: '/regulations',
+  path: '/regulations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewRoute = ReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/conflicts': typeof ConflictsRoute
+  '/corrections': typeof CorrectionsRoute
+  '/dashboard': typeof DashboardRoute
+  '/design-generator': typeof DesignGeneratorRoute
+  '/envelope': typeof EnvelopeRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/library': typeof LibraryRoute
+  '/new-project': typeof NewProjectRoute
+  '/notifications': typeof NotificationsRoute
+  '/plan-analysis': typeof PlanAnalysisRoute
+  '/projects': typeof ProjectsRoute
+  '/regulations': typeof RegulationsRoute
+  '/report': typeof ReportRoute
+  '/review': typeof ReviewRoute
+  '/settings': typeof SettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/conflicts': typeof ConflictsRoute
+  '/corrections': typeof CorrectionsRoute
+  '/dashboard': typeof DashboardRoute
+  '/design-generator': typeof DesignGeneratorRoute
+  '/envelope': typeof EnvelopeRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/library': typeof LibraryRoute
+  '/new-project': typeof NewProjectRoute
+  '/notifications': typeof NotificationsRoute
+  '/plan-analysis': typeof PlanAnalysisRoute
+  '/projects': typeof ProjectsRoute
+  '/regulations': typeof RegulationsRoute
+  '/report': typeof ReportRoute
+  '/review': typeof ReviewRoute
+  '/settings': typeof SettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/conflicts': typeof ConflictsRoute
+  '/corrections': typeof CorrectionsRoute
+  '/dashboard': typeof DashboardRoute
+  '/design-generator': typeof DesignGeneratorRoute
+  '/envelope': typeof EnvelopeRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/library': typeof LibraryRoute
+  '/new-project': typeof NewProjectRoute
+  '/notifications': typeof NotificationsRoute
+  '/plan-analysis': typeof PlanAnalysisRoute
+  '/projects': typeof ProjectsRoute
+  '/regulations': typeof RegulationsRoute
+  '/report': typeof ReportRoute
+  '/review': typeof ReviewRoute
+  '/settings': typeof SettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/conflicts'
+    | '/corrections'
+    | '/dashboard'
+    | '/design-generator'
+    | '/envelope'
+    | '/how-it-works'
+    | '/library'
+    | '/new-project'
+    | '/notifications'
+    | '/plan-analysis'
+    | '/projects'
+    | '/regulations'
+    | '/report'
+    | '/review'
+    | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/conflicts'
+    | '/corrections'
+    | '/dashboard'
+    | '/design-generator'
+    | '/envelope'
+    | '/how-it-works'
+    | '/library'
+    | '/new-project'
+    | '/notifications'
+    | '/plan-analysis'
+    | '/projects'
+    | '/regulations'
+    | '/report'
+    | '/review'
+    | '/settings'
+  id:
+    | '__root__'
+    | '/'
+    | '/conflicts'
+    | '/corrections'
+    | '/dashboard'
+    | '/design-generator'
+    | '/envelope'
+    | '/how-it-works'
+    | '/library'
+    | '/new-project'
+    | '/notifications'
+    | '/plan-analysis'
+    | '/projects'
+    | '/regulations'
+    | '/report'
+    | '/review'
+    | '/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ConflictsRoute: typeof ConflictsRoute
+  CorrectionsRoute: typeof CorrectionsRoute
+  DashboardRoute: typeof DashboardRoute
+  DesignGeneratorRoute: typeof DesignGeneratorRoute
+  EnvelopeRoute: typeof EnvelopeRoute
+  HowItWorksRoute: typeof HowItWorksRoute
+  LibraryRoute: typeof LibraryRoute
+  NewProjectRoute: typeof NewProjectRoute
+  NotificationsRoute: typeof NotificationsRoute
+  PlanAnalysisRoute: typeof PlanAnalysisRoute
+  ProjectsRoute: typeof ProjectsRoute
+  RegulationsRoute: typeof RegulationsRoute
+  ReportRoute: typeof ReportRoute
+  ReviewRoute: typeof ReviewRoute
+  SettingsRoute: typeof SettingsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +247,131 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/conflicts': {
+      id: '/conflicts'
+      path: '/conflicts'
+      fullPath: '/conflicts'
+      preLoaderRoute: typeof ConflictsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/corrections': {
+      id: '/corrections'
+      path: '/corrections'
+      fullPath: '/corrections'
+      preLoaderRoute: typeof CorrectionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/design-generator': {
+      id: '/design-generator'
+      path: '/design-generator'
+      fullPath: '/design-generator'
+      preLoaderRoute: typeof DesignGeneratorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/envelope': {
+      id: '/envelope'
+      path: '/envelope'
+      fullPath: '/envelope'
+      preLoaderRoute: typeof EnvelopeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/new-project': {
+      id: '/new-project'
+      path: '/new-project'
+      fullPath: '/new-project'
+      preLoaderRoute: typeof NewProjectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plan-analysis': {
+      id: '/plan-analysis'
+      path: '/plan-analysis'
+      fullPath: '/plan-analysis'
+      preLoaderRoute: typeof PlanAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/regulations': {
+      id: '/regulations'
+      path: '/regulations'
+      fullPath: '/regulations'
+      preLoaderRoute: typeof RegulationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/review': {
+      id: '/review'
+      path: '/review'
+      fullPath: '/review'
+      preLoaderRoute: typeof ReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ConflictsRoute: ConflictsRoute,
+  CorrectionsRoute: CorrectionsRoute,
+  DashboardRoute: DashboardRoute,
+  DesignGeneratorRoute: DesignGeneratorRoute,
+  EnvelopeRoute: EnvelopeRoute,
+  HowItWorksRoute: HowItWorksRoute,
+  LibraryRoute: LibraryRoute,
+  NewProjectRoute: NewProjectRoute,
+  NotificationsRoute: NotificationsRoute,
+  PlanAnalysisRoute: PlanAnalysisRoute,
+  ProjectsRoute: ProjectsRoute,
+  RegulationsRoute: RegulationsRoute,
+  ReportRoute: ReportRoute,
+  ReviewRoute: ReviewRoute,
+  SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
