@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Home, FolderKanban, PlusSquare, Scale, GitCompareArrows, Box, ScanLine, Wand2, Sparkles, Library, UserCheck, FileBarChart, Bell, Settings, Languages, Menu } from "lucide-react";
+import { Map as MapIcon, Home, FolderKanban, PlusSquare, Scale, GitCompareArrows, Box, ScanLine, Wand2, Sparkles, Library, UserCheck, FileBarChart, Bell, Settings, Languages, Menu } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Logo } from "./brand";
 import { useI18n, type Key } from "@/lib/i18n";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 const nav: { to: string; k: Key; icon: typeof Home; section?: string }[] = [
   { to: "/dashboard", k: "home", icon: Home },
   { to: "/projects", k: "projects", icon: FolderKanban },
+  { to: "/workspace", k: "workspace", icon: MapIcon },
   { to: "/new-project", k: "newProject", icon: PlusSquare },
   { to: "/regulations", k: "regulations", icon: Scale, section: "مشروع: فيلا الملقا" },
   { to: "/conflicts", k: "conflicts", icon: GitCompareArrows },

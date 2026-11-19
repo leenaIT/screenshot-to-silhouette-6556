@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 
 export type Lang = "ar" | "en";
 const dict = {
-  home: ["الرئيسية", "Home"], projects: ["مشاريعي", "My projects"], newProject: ["مشروع جديد", "New project"],
+  home: ["الرئيسية", "Home"], workspace: ["مساحة العمل الخرائطية", "Map workspace"], projects: ["مشاريعي", "My projects"], newProject: ["مشروع جديد", "New project"],
   regulations: ["الاشتراطات العمرانية", "Regulations"], conflicts: ["التعارضات", "Conflicts"],
   envelope: ["الغلاف البنائي ثلاثي الأبعاد", "3D envelope"], planAnalysis: ["تحليل المخططات", "Plan analysis"],
   corrections: ["التعديلات المقترحة", "Corrections"], generator: ["المخطط المبدئي", "Concept generator"],
