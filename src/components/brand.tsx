@@ -11,7 +11,7 @@ export function Logo({ light }: { light?: boolean }) {
       <img
         src={logoAsset.url}
         alt="بنيان — BUNYAN"
-        className={cn("h-9 w-auto", light && "rounded-md bg-ivory px-2.5 py-1.5")}
+        className={cn("h-9 w-auto", !light && "logo-on-light")}
       />
     </Link>
   );
