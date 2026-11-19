@@ -246,6 +246,10 @@
 .step-progress { height: 100%; }
 .step-progress.is-playing { transform-origin: top; animation: step-fill 4s linear both; }
 @keyframes step-fill { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@media (max-width: 767px) {
+  .step-progress.is-playing { transform-origin: right; animation-name: step-fill-horizontal; }
+}
+@keyframes step-fill-horizontal { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .explorer-tabs { scrollbar-width: thin; scrollbar-color: var(--olive) var(--secondary); scroll-snap-type: x mandatory; }
 .explorer-step { scroll-snap-align: center; }
 .map-road { fill: var(--sand); }

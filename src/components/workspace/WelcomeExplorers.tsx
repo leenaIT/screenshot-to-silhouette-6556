@@ -18,13 +18,13 @@ const benefits = [
 
 function StepVisual({ step }: { step: number }) {
   if (step === 0) return <div className="explorer-map h-full w-full" aria-label="خريطة توضيحية مع حدود قطعة أرض">
-    <svg viewBox="0 0 600 420" className="h-full w-full" aria-hidden="true">
+    <svg viewBox="0 0 600 420" preserveAspectRatio="xMidYMid slice" className="h-full w-full" aria-hidden="true">
       <defs><pattern id="aerial-blocks" width="100" height="100" patternTransform="rotate(-18)" patternUnits="userSpaceOnUse"><rect width="100" height="100" className="map-road" /><rect x="10" y="10" width="80" height="80" className="map-block" /><path d="M17 18h29v28H17z M53 19h28v31H53z M20 55h24v28H20z M53 59h27v23H53z" className="map-roof" /><path d="M14 49h70M48 14v72" className="map-path" /></pattern></defs>
       <rect width="600" height="420" fill="url(#aerial-blocks)" />
       <path d="M0 318L600 108" className="map-avenue" />
       <path d="M239 166L338 134L365 213L266 246Z" className="map-plot" pathLength="1" />
     </svg>
-    <MapPin className="explorer-pin absolute left-1/2 top-[36%] h-12 w-12 text-primary" />
+    <MapPin className="explorer-pin absolute left-[calc(50%-24px)] top-[calc(45%-48px)] h-12 w-12 text-primary" />
     <span className="absolute bottom-6 right-6 rounded-md bg-background/95 px-3 py-2 text-xs text-primary">قطعة الأرض · عرض توضيحي</span>
   </div>;
   if (step === 1) return <div className="flex h-full flex-col justify-center px-6 sm:px-10">
@@ -62,7 +62,7 @@ export function StepExplorer() {
   return <motion.div initial={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .2 }} transition={{ duration: reduced ? 0 : .35 }} className="step-explorer mt-10 grid items-center gap-8 md:grid-cols-2 md:gap-12">
     <div ref={tabs} role="tablist" aria-label="خطوات بنيان" className="explorer-tabs relative flex gap-5 overflow-x-auto md:flex-col md:gap-0 md:overflow-visible">
       {steps.map((step, i) => <Button key={step.title} id={`step-tab-${i}`} role="tab" aria-selected={active === i} aria-controls="step-preview" variant="ghost" onMouseEnter={() => choose(i)} onFocus={() => choose(i)} onClick={() => choose(i)} onKeyDown={e => { if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(e.key)) { e.preventDefault(); const next = (i + (['ArrowDown', 'ArrowLeft'].includes(e.key) ? 1 : -1) + 4) % 4; choose(next); const node = tabs.current?.children[next]; if (node instanceof HTMLElement) node.focus(); } }} className={cn('explorer-step relative h-auto w-64 shrink-0 justify-start gap-5 rounded-none px-0 py-5 text-right whitespace-normal hover:bg-transparent md:w-full', active === i ? 'text-primary' : 'text-muted-foreground')}>
-        <span className="step-track absolute right-0 top-0 hidden h-full w-px bg-border md:block">{active === i && <span key={`${active}:${paused}`} className={cn('step-progress absolute inset-x-0 top-0 bg-primary', !paused && !reduced && 'is-playing')} />}</span>
+        <span className="step-track absolute inset-x-0 bottom-0 h-px bg-border md:inset-x-auto md:right-0 md:top-0 md:h-full md:w-px">{active === i && <span key={`${active}:${paused}`} className={cn('step-progress absolute inset-0 bg-primary', !paused && !reduced && 'is-playing')} />}</span>
         <span className="w-12 shrink-0 text-4xl font-medium md:mr-5">{String(i + 1).padStart(2, '0')}</span><span className="min-w-0"><span className="block text-base font-semibold md:text-lg">{step.title}</span><span className={cn('mt-2 block text-xs font-normal leading-6 md:text-sm', active !== i && 'line-clamp-1 opacity-65')}>{step.description}</span></span>
       </Button>)}
     </div>
