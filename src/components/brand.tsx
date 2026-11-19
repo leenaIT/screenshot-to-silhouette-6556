@@ -3,18 +3,16 @@ import { cn } from "@/lib/utils";
 import { DEMO_NOTICE } from "@/lib/mock-data";
 import { FlaskConical } from "lucide-react";
 import type { ReactNode } from "react";
+import logoAsset from "@/assets/bunyan-logo.svg.asset.json";
 
 export function Logo({ light }: { light?: boolean }) {
   return (
-    <Link to="/" className="flex items-center gap-2.5">
-      <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden>
-        <rect x="2" y="18" width="8" height="12" rx="1" className={light ? "fill-sand" : "fill-olive"} />
-        <rect x="12" y="10" width="8" height="20" rx="1" className={light ? "fill-ivory" : "fill-primary"} />
-        <rect x="22" y="4" width="8" height="26" rx="1" className={light ? "fill-sand" : "fill-sand"} />
-      </svg>
-      <span className={cn("text-xl font-bold tracking-tight", light ? "text-sidebar-foreground" : "text-primary")}>
-        بنيان <span className="font-medium opacity-60 text-sm">BUNYAN</span>
-      </span>
+    <Link to="/" className="flex items-center gap-2.5" aria-label="بنيان — BUNYAN">
+      <img
+        src={logoAsset.url}
+        alt="بنيان — BUNYAN"
+        className={cn("h-9 w-auto", light && "rounded-md bg-ivory px-2.5 py-1.5")}
+      />
     </Link>
   );
 }
