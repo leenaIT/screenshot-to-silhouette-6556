@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { StepExplorer } from './WelcomeExplorers';
+import { BenefitComparison, StepExplorer } from './WelcomeExplorers';
 
 beforeEach(() => {
   vi.stubGlobal('IntersectionObserver', class {
@@ -31,4 +31,12 @@ it('activates a hovered step immediately and pauses automatic changes', () => {
   expect(screen.getByRole('tab', { name: /شاهد الحجم المسموح/ })).toHaveAttribute('aria-selected', 'true');
   act(() => vi.advanceTimersByTime(8000));
   expect(screen.getByRole('tab', { name: /شاهد الحجم المسموح/ })).toHaveAttribute('aria-selected', 'true');
+});
+it('shows only the "with Bunyan" benefits with no comparison toggle', () => {
+  render(<BenefitComparison />);
+  expect(screen.getByText('دقائق')).toBeInTheDocument();
+  expect(screen.getByText('تكلفة أقل من البداية')).toBeInTheDocument();
+  expect(screen.getByText('تُكتشف قبل التقديم')).toBeInTheDocument();
+  expect(screen.queryByText('بدون بنيان')).not.toBeInTheDocument();
+  expect(screen.queryByRole('button')).not.toBeInTheDocument();
 });
