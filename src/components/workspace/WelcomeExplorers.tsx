@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { Check, MapPin, TriangleAlert, Clock3, Wallet, ShieldAlert } from 'lucide-react';
+import { Check, MapPin, Clock3, Wallet, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -11,9 +11,9 @@ const steps = [
   { title: 'صمّم وراجِع', description: 'ارفع مخططك للتدقيق أو ولّد مخططًا مبدئيًا، ثم أرسله للمراجعة الهندسية.' },
 ];
 const benefits = [
-  { icon: Clock3, title: 'وقت أقل في إعادة التصميم', before: 'أسابيع من التعديلات', after: 'دقائق', description: 'تبدأ من الاشتراطات الصحيحة بدل اكتشافها بعد رفض المخطط.' },
-  { icon: Wallet, title: 'تكلفة أقل', before: 'تعديلات متكررة وغرامات', after: 'تكلفة أقل من البداية', description: 'تجنّب تعديلات المكاتب الهندسية المتكررة وغرامات المخالفات.' },
-  { icon: ShieldAlert, title: 'اكتشاف مبكر للمخالفات', before: 'تُكتشف بعد رفض المخطط', after: 'تُكتشف قبل التقديم', description: 'تقرير مطابقة يوضح كل مخالفة ومصدرها والتعديل المقترح.' },
+  { icon: Clock3, title: 'وقت أقل في إعادة التصميم', value: 'دقائق', description: 'تبدأ من الاشتراطات الصحيحة بدل اكتشافها بعد رفض المخطط.' },
+  { icon: Wallet, title: 'تكلفة أقل', value: 'تكلفة أقل من البداية', description: 'تجنّب تعديلات المكاتب الهندسية المتكررة وغرامات المخالفات.' },
+  { icon: ShieldAlert, title: 'اكتشاف مبكر للمخالفات', value: 'تُكتشف قبل التقديم', description: 'تقرير مطابقة يوضح كل مخالفة ومصدرها والتعديل المقترح.' },
 ];
 
 function StepVisual({ step }: { step: number }) {
@@ -74,30 +74,11 @@ export function StepExplorer() {
 
 export function BenefitComparison() {
   const reduced = useReducedMotion();
-  const [enabled, setEnabled] = useState(false);
-  const touched = useRef(false);
   return <motion.div initial={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .25 }} transition={{ duration: reduced ? 0 : .35 }} className="mt-10">
-    <AutoCompare onSwitch={() => { if (!touched.current) setEnabled(true); }} />
-    <div className="mb-7 inline-flex border-b border-border" role="group" aria-label="مقارنة بنيان">{[false, true].map(value => <Button key={String(value)} variant="ghost" aria-pressed={enabled === value} onClick={() => { touched.current = true; setEnabled(value); }} className={cn('h-12 rounded-none border-b-2 px-6 text-sm', enabled === value ? 'border-primary text-primary' : 'border-transparent text-muted-foreground')}>{value ? 'مع بنيان' : 'بدون بنيان'}</Button>)}</div>
-    <div data-comparison={enabled ? 'with' : 'without'}>{benefits.map(benefit => <article key={benefit.title} className={cn('comparison-row group relative grid items-center gap-4 border-b border-border px-4 py-7 sm:grid-cols-[48px_1fr_1fr] sm:gap-6 sm:py-9', enabled ? 'text-primary' : 'text-muted-foreground')}>
+    <div>{benefits.map(benefit => <article key={benefit.title} className="comparison-row group relative grid items-center gap-4 border-b border-border px-4 py-7 text-primary sm:grid-cols-[48px_1fr_1fr] sm:gap-6 sm:py-9">
       <div className="flex items-center gap-3 sm:block"><benefit.icon className="comparison-icon h-7 w-7" /><span className="sm:hidden text-base font-semibold">{benefit.title}</span></div>
       <div><h3 className="hidden text-lg font-semibold sm:block">{benefit.title}</h3><p className="mt-2 text-sm leading-7 text-muted-foreground">{benefit.description}</p></div>
-      <div className="flex min-h-14 items-center gap-3 overflow-hidden"><span className="shrink-0">{enabled ? <Check className="h-5 w-5" /> : <TriangleAlert className="h-5 w-5" />}</span><AnimatePresence mode="wait" initial={false}><motion.p key={String(enabled)} initial={{ opacity: 0, y: reduced ? 0 : 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: reduced ? 0 : -12 }} transition={{ duration: reduced ? 0 : .18 }} className="text-lg font-semibold leading-8 md:text-xl">{enabled ? benefit.after : benefit.before}</motion.p></AnimatePresence></div>
+      <div className="flex min-h-14 items-center gap-3"><Check className="h-5 w-5 shrink-0 text-accent" /><p className="text-lg font-semibold leading-8 md:text-xl">{benefit.value}</p></div>
     </article>)}</div>
   </motion.div>;
-}
-
-function AutoCompare({ onSwitch }: { onSwitch: () => void }) {
-  const element = useRef<HTMLSpanElement>(null);
-  const callback = useRef(onSwitch);
-  callback.current = onSwitch;
-  useEffect(() => {
-    const node = element.current;
-    if (!node) return;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const observer = new IntersectionObserver(entries => { if (entries.some(entry => entry.isIntersecting)) { observer.disconnect(); timer = setTimeout(() => callback.current(), 1000); } }, { threshold: 1 });
-    observer.observe(node);
-    return () => { observer.disconnect(); clearTimeout(timer); };
-  }, []);
-  return <span ref={element} aria-hidden="true" className="block h-px" />;
 }
